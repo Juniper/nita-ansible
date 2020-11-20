@@ -1,0 +1,3 @@
+nita-*/usr/share/nita-ansible*/images/*.tar.gz
+nita-*/usr/local/bin/*
+*.deb

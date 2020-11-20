@@ -1,0 +1,9 @@
+Package: nita-ansible-2.9.9
+Version: 20.10-1
+Section: base
+Priority: optional
+Architecture: all
+Maintainer: Ashley Burston <aburston@juniper.net>, Hugo Ribeiro <hribeiro@juniper.net>
+Description: Ansible addon for NITA base package
+ Copyright Juniper Networks 2020
+ See https://support.juniper.net/support/legal/scriptlicense/
