@@ -26,8 +26,8 @@ COPY requirements.yml .
 RUN ansible-galaxy role install -r requirements.yml
 RUN ansible-galaxy collection install -r requirements.yml
 
-LABEL net.juniper.image.release="20.7-1" \
-      net.juniper.image.branch="20.7" \
+LABEL net.juniper.image.release="20.10-1" \
+      net.juniper.image.branch="20.10" \
       net.juniper.image.issue.date="22/07/2020" \
       net.juniper.image.create.date="22/07/2020" \
       net.juniper.image.mantainer="Juniper Networks, Inc." \

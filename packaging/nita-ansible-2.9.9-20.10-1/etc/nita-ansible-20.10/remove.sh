@@ -32,7 +32,7 @@ docker ps --filter status=dead --filter status=exited -aq | xargs -r docker rm -
 docker volume ls -qf dangling=true | xargs -r docker volume rm
 
 # remove docker images
-docker rmi -f juniper/nita-ansible:20.7-1
+docker rmi -f juniper/nita-ansible:20.10-1
 docker rmi -f juniper/nita-ansible:_nita_release_$VERSION
 
 # remove unused images
