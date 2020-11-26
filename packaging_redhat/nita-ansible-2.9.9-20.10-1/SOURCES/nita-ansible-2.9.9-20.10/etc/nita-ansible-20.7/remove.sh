@@ -32,8 +32,8 @@ docker ps --filter status=dead --filter status=exited -aq | xargs -r docker rm -
 docker volume ls -qf dangling=true | xargs -r docker volume rm
 
 # remove docker images
-docker rmi -f ps-docker.artifactory.aslab.juniper.net/ansible:20.10-1
-docker rmi -f ps-docker.artifactory.aslab.juniper.net/ansible:_nita_release_$VERSION
+docker rmi -f juniper/nita-ansible:20.10-1
+docker rmi -f juniper/nita-ansible:_nita_release_$VERSION
 
 # remove unused images
 docker images --no-trunc | grep '<none>' | awk '{ print $3 }' | xargs -r docker rmi

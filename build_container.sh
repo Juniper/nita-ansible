@@ -13,4 +13,4 @@
 # Third-Party Code: This code may depend on other components under separate copyright notice and license terms. Your use of the source code for those components is subject to the terms and conditions of the respective license as noted in the Third-Party source code file.
 #
 # ********************************************************
-docker build -t ps-docker.artifactory.aslab.juniper.net/ansible:20.10-1 .
+docker build -t juniper/nita-ansible:20.10-1 .

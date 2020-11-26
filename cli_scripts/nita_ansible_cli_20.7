@@ -15,7 +15,7 @@
 # ********************************************************
 if [ "$_CLI_RUNNER_DEBUG" == 1 ]; then
         echo `cat <<EOT
-docker run -e PS1="\u@\h:\w# " -it --rm --name ansible -u root -v /var/nita_project:/project:rw -v /var/nita_configs:/var/tmp/build:rw ps-docker.artifactory.aslab.juniper.net/ansible:20.10-1 /bin/bash
+docker run -e PS1="\u@\h:\w# " -it --rm --name ansible -u root -v /var/nita_project:/project:rw -v /var/nita_configs:/var/tmp/build:rw juniper/nita-ansible:20.10-1 /bin/bash
 EOT` >&2
 fi
-docker run -e PS1="\u@\h:\w# " -it --rm --name ansible -u root -v /var/nita_project:/project:rw -v /var/nita_configs:/var/tmp/build:rw ps-docker.artifactory.aslab.juniper.net/ansible:20.10-1 /bin/bash
+docker run -e PS1="\u@\h:\w# " -it --rm --name ansible -u root -v /var/nita_project:/project:rw -v /var/nita_configs:/var/tmp/build:rw juniper/nita-ansible:20.10-1 /bin/bash

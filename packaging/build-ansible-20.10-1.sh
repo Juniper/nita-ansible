@@ -64,6 +64,6 @@ mkdir -p ${IMAGEDIR}
     cd ..
     ./build-container.sh
 )
-docker save ps-docker.artifactory.aslab.juniper.net/ansible:20.10-1 | gzip > ${IMAGEDIR}/ansible-20.10-1.tar.gz
+docker save juniper/nita-ansible:20.10-1 | gzip > ${IMAGEDIR}/nita-ansible-20.10-1.tar.gz
 
 dpkg-deb --build ${PACKAGE}-${VERSION}

@@ -51,4 +51,4 @@ function add_image {
 }
 
 # load docker images
-add_image $IMAGES_DIR/ansible-${VERSION}.tar.gz ps-docker.artifactory.aslab.juniper.net/ansible:20.10-1
+add_image $IMAGES_DIR/nita-ansible-${VERSION}.tar.gz juniper/net-ansible:20.10-1
