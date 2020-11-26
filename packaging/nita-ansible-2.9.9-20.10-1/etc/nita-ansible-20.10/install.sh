@@ -51,4 +51,4 @@ function add_image {
 }
 
 # load docker images
-add_image $IMAGES_DIR/nita-ansible-20.7-1.tar.gz juniper/nita-ansible:20.10-1
+add_image $IMAGES_DIR/nita-ansible-20.10-1.tar.gz juniper/nita-ansible:20.10-1
