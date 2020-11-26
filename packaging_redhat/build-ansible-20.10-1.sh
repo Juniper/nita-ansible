@@ -62,7 +62,7 @@ mkdir -p ${IMAGEDIR}
 
 (
     cd ..
-    ./build-container.sh
+    ./build_container.sh
 )
 docker save juniper/nita-ansible:20.10-1 | gzip > ${IMAGEDIR}/nita-ansible-${VERSION}-${RELEASE}.tar.gz
 
