@@ -6,4 +6,4 @@ Architecture: all
 Maintainer: Ashley Burston <aburston@juniper.net>, Hugo Ribeiro <hribeiro@juniper.net>
 Description: Ansible addon for NITA base package
  Copyright Juniper Networks 2020
- See https://support.juniper.net/support/legal/scriptlicense/
+ Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0
