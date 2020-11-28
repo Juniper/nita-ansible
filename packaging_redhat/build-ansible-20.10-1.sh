@@ -59,7 +59,6 @@ install -m 755 ../cli_scripts/* ${SCRIPTSDIR}
 # pull all the required containers
 IMAGEDIR=${SOURCE_DIR}/${PACKAGE}-${VERSION}/usr/share/${PACKAGE}/images
 mkdir -p ${IMAGEDIR}
-
 (
     cd ..
     ./build_container.sh
