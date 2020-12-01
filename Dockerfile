@@ -26,6 +26,15 @@ COPY requirements.yml .
 RUN ansible-galaxy role install -r requirements.yml
 RUN ansible-galaxy collection install -r requirements.yml
 
+COPY roles.tar.gz .
+RUN tar -zxvf roles.tar.gz
+RUN cd ebgp-ip-fabric && bash install.sh
+RUN cd evpn-vxlan-common && bash install.sh
+RUN cd evpn-vxlan-dci && bash install.sh
+RUN cd evpn-vxlan-erb && bash install.sh
+RUN cd evpn-vxlan-hb && bash install.sh
+RUN cd evpn-vxlan-sb && bash install.sh
+
 LABEL net.juniper.framework="NITA"
 
 WORKDIR /runner

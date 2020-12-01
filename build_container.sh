@@ -13,4 +13,13 @@
 # Third-Party Code: This code may depend on other components under separate copyright notice and license terms. Your use of the source code for those components is subject to the terms and conditions of the respective license as noted in the Third-Party source code file.
 #
 # ********************************************************
+
+git clone https://github.com/JNPRAutomate/ebgp-ip-fabric.git
+git clone https://github.com/JNPRAutomate/evpn-vxlan-common.git
+git clone https://github.com/JNPRAutomate/evpn-vxlan-dci.git
+git clone https://github.com/JNPRAutomate/evpn-vxlan-erb.git
+git clone https://github.com/JNPRAutomate/evpn-vxlan-hb.git
+git clone https://github.com/JNPRAutomate/evpn-vxlan-sb.git
+tar -zcvf roles.tar.gz ebgp-ip-fabric evpn-vxlan-common evpn-vxlan-dci evpn-vxlan-erb evpn-vxlan-hb evpn-vxlan-sb
+
 docker build -t juniper/nita-ansible:20.10-1 .
