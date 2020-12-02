@@ -13,28 +13,45 @@
 #
 # ********************************************************
 
-FROM ansible/ansible-runner:1.4.6
+FROM alpine:3.12.1
 
+# ==> Specify Python requirements filename;   default = "requirements.txt"
+# ==> Specify Ansible requirements filename;  default = "requirements.yml"
+# ==> Specify playbook filename;              default = "playbook.yml"
+# DO NOT CHANGE THESE DEFAULTS. OTHER APPS DEPEND ON THEM
+ENV PYREQS="requirements.txt"
+ENV REQUIREMENTS="requirements.yml"
+ENV PLAYBOOK="playbook.yml"
+
+RUN apk add --no-cache sudo \
+    python3 py3-pip openssl ca-certificates git \
+    gcc libxml2-dev libxslt-dev musl-dev \
+    bash python3-dev openssh-server \
+    libffi-dev openssl-dev build-base curl \
+    ansible
+
+# copy requirements.txt for Python and install
 WORKDIR /tmp
-
-# Copy and install Python3 library and modules dependencies
-COPY requirements.txt .
+COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-#Copy and install Ansible module and collections dependencies
+RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/  
 COPY requirements.yml .
-RUN ansible-galaxy role install -r requirements.yml
-RUN ansible-galaxy collection install -r requirements.yml
+RUN ansible-galaxy collection install -r requirements.yml -p /etc/ansible/roles
 
 COPY roles.tar.gz .
 RUN tar -zxvf roles.tar.gz
 RUN cd ebgp-ip-fabric && bash install.sh
 RUN cd evpn-vxlan-common && bash install.sh
-RUN cd evpn-vxlan-dci && bash install.sh
+RUN cd evpn-vxlan-fi && bash install.sh
 RUN cd evpn-vxlan-erb && bash install.sh
 RUN cd evpn-vxlan-hb && bash install.sh
 RUN cd evpn-vxlan-sb && bash install.sh
 
+WORKDIR /project
+VOLUME /project
+
 LABEL net.juniper.framework="NITA"
 
-WORKDIR /runner
+WORKDIR /root
+CMD bash
