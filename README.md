@@ -46,7 +46,7 @@ If you do not have the the required package files for your system, .deb for Ubun
 If you have been provided with the .deb package file, then follow the instructions provided in the [Dependencies](##Dependencies) section above and then run the following command:
 
 ```bash
-sudo apt-get install ./nita-ansible-2.9.9-20.10-1.deb
+sudo apt-get install ./nita-ansible-2.9.14-20.10-1.deb
 ```
 
 ### Centos
@@ -55,7 +55,7 @@ If you have been provided with the .rpm package file, then follow the instructio
 
 
 ```bash
-sudo yum install ./nita-ansible-2.9.9-20.10-1.noarch.rpm
+sudo yum install ./nita-ansible-2.9.14-20.10-1.noarch.rpm
 ```
 
 # Misc
