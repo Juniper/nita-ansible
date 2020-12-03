@@ -17,7 +17,7 @@
 %define          debug_package %{nil}
 %define        __os_install_post %{_dbpath}/brp-compress
 
-Name:           nita-ansible-2.9.9
+Name:           nita-ansible-2.9.14
 Version:        20.10
 Release:        1
 Summary:        Network Implementation and Test Automation

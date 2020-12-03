@@ -28,7 +28,7 @@ RUN apk add --no-cache sudo \
     gcc libxml2-dev libxslt-dev musl-dev \
     bash python3-dev openssh-server \
     libffi-dev openssl-dev build-base curl \
-    ansible
+    ansible=2.9.14-r0
 
 # copy requirements.txt for Python and install
 WORKDIR /tmp

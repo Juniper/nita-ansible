@@ -15,7 +15,7 @@
 #
 # ********************************************************
 
-PACKAGE=nita-ansible-2.9.9
+PACKAGE=nita-ansible-2.9.14
 VERSION=20.10-1
 IMAGES_DIR=/usr/share/${PACKAGE}/images
 
@@ -51,4 +51,4 @@ function add_image {
 }
 
 # load docker images
-add_image $IMAGES_DIR/nita-ansible-20.10-1.tar.gz juniper/nita-ansible:20.10-1
+add_image $IMAGES_DIR/nita-ansible-${VERSION}.tar.gz juniper/nita-ansible:20.10-1

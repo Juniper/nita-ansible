@@ -15,7 +15,7 @@
 #
 # ********************************************************
 
-PACKAGE=nita-ansible-2.9.9
+PACKAGE=nita-ansible-2.9.14
 VERSION=20.10-1
 
 # stop the script if a command fails

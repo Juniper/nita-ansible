@@ -18,7 +18,7 @@
 # stop the script if a command fails
 set -e
 
-PACKAGE=nita-ansible-2.9.9
+PACKAGE=nita-ansible-2.9.14
 VERSION=20.10-1
 
 # cleanup version if the directory name is used
