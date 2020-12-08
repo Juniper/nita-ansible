@@ -1,0 +1,34 @@
+#jinja2:lstrip_blocks: True
+protocols {
+    bgp {
+{% for bgp in underlay_ebgp %}
+        group {{ bgp.group }} {
+            bfd-liveness-detection minimum-interval 1000;
+            bfd-liveness-detection multiplier 3;
+	    export IPCLOS_BGP_EXP;
+            import IPCLOS_BGP_IMP;
+            type external;
+            mtu-discovery;
+            vpn-apply-export;
+            local-as "{{ bgp.autonomous_system }}";
+            multipath {
+                multiple-as;
+            }
+{% for neighbor in bgp.neighbors %}
+            neighbor {{ neighbor.name }} {
+                description "EBGP peering to {{ neighbor.name }}";
+                peer-as {{ neighbor.asn }};
+            }
+{% endfor %}
+        }
+{% endfor %}
+    }
+
+    igmp-snooping {
+        vlan default;
+    }
+
+    lldp {
+        interface all;
+    }
+}

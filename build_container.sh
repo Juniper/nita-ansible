@@ -14,12 +14,4 @@
 #
 # ********************************************************
 
-[ -d ebgp-ip-fabric ] || git clone https://github.com/JNPRAutomate/ebgp-ip-fabric.git
-[ -d evpn-vxlan-common ] || git clone https://github.com/JNPRAutomate/evpn-vxlan-common.git
-[ -d evpn-vxlan-fi ] || git clone https://github.com/JNPRAutomate/evpn-vxlan-fi.git
-[ -d evpn-vxlan-erb ] || git clone https://github.com/JNPRAutomate/evpn-vxlan-erb.git
-[ -d evpn-vxlan-hb ] || git clone https://github.com/JNPRAutomate/evpn-vxlan-hb.git
-[ -d evpn-vxlan-sb ] || git clone https://github.com/JNPRAutomate/evpn-vxlan-sb.git
-tar -zcvf roles.tar.gz ebgp-ip-fabric evpn-vxlan-common evpn-vxlan-fi evpn-vxlan-erb evpn-vxlan-hb evpn-vxlan-sb
-
 docker build -t juniper/nita-ansible:20.10-1 .

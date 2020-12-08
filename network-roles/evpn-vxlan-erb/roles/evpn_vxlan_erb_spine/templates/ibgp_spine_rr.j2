@@ -1,0 +1,20 @@
+protocols {
+    bgp {
+{% for bgp in evpn_ibgp %}
+        group EVPN_iBGP {
+            type internal;
+            local-address {{ loopback_ip }};
+            family evpn {
+                signaling;
+            }
+            cluster {{ loopback_ip }};
+            local-as {{ autonomous_system }};
+            multipath;
+            allow {{ loopback_subnet }};
+{% for neighbor in bgp.neighbors %}
+            neighbor {{ neighbor.name }};
+{% endfor %}
+        }
+{% endfor %}
+    }
+}

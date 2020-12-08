@@ -1,0 +1,25 @@
+security {
+    zones {
+{% if vrfs is defined %}
+{% for vrf in vrfs %}
+        security-zone VRF_{{ vrf.vrf_id }} {
+            host-inbound-traffic {
+                system-services {
+                    all;
+                }
+                protocols {
+                    all;
+                }
+            }
+{% if vrf.ospf_interfaces is defined %}
+            interfaces {
+{% for interface in vrf.ospf_interfaces %}
+	        {{ interface.name }};
+{% endfor %}
+            }
+{% endif %}
+        }
+{% endfor %}
+{% endif %}
+    }
+}

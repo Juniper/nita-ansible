@@ -1,0 +1,9 @@
+policy-options {
+    policy-statement ospf-default {
+        term 1 {
+            from {
+                route-filter 0.0.0.0/0 exact accept;
+            }
+        }
+    }
+}

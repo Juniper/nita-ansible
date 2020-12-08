@@ -1,0 +1,30 @@
+#jinja2:lstrip_blocks: True
+routing-instances {
+    fabric {
+        instance-type virtual-router;
+{% for port in firewall_port %}
+        interface {{ port.interface }}.{{ port.vlan_id | default("0", true) }};
+{% endfor %}
+        routing-options {
+            static {
+                route 0.0.0.0/0 discard;
+            }
+        }
+        protocols {
+            ospf {
+                export ospf-default;
+                area 0.0.0.0 {
+{% if vrfs is defined %}
+{% for vrf in vrfs %}
+{% if vrf.ospf_interfaces is defined %}
+{% for interface in vrf.ospf_interfaces %}
+                    interface {{ interface.name }};
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+                }
+            }
+        }
+    }
+}

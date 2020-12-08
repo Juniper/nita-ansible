@@ -1,0 +1,57 @@
+policy-options {
+    policy-statement EVPN_T5_EXPORT {
+        term fm_direct {
+            from protocol direct;
+            then accept;
+        }
+        term fm_static {
+            from protocol static;
+            then accept;
+        }
+{% if collapsed_spine is defined %}	    
+{% if collapsed_spine %}
+        term fm_v4_default {
+            from {
+                protocol evpn;
+                protocol ospf;
+                route-filter 0.0.0.0/0 exact;
+            }
+            then accept;
+        }
+        term fm_v4_host {
+            from {
+                protocol evpn;
+                route-filter 0.0.0.0/0 prefix-length-range /32-/32;
+            }
+            then accept;
+        }
+{% endif %}
+{% else %}
+{% if leaf_type == "border" %}	    
+        term fm_v4_default {
+            from {
+                protocol evpn;
+                protocol ospf;
+                route-filter 0.0.0.0/0 exact;
+            }
+            then accept;
+        }
+{% else %}
+        term fm_v4_host {
+            from {
+                protocol evpn;
+                route-filter 0.0.0.0/0 prefix-length-range /32-/32;
+            }
+            then accept;
+        }
+{% endif %}
+{% endif %}
+        term fm_v6_host {
+            from {
+                protocol evpn;
+                route-filter 0::0/0 prefix-length-range /128-/128;
+            }
+            then accept;
+        }
+    }
+}

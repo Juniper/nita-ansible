@@ -1,0 +1,20 @@
+{% if firewall_rules is defined %}
+security {
+{% for rule in firewall_rules %}
+    policies {
+        from-zone {{ rule.from_zone }} to-zone {{ rule.to_zone }} {
+            policy default-permit {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+    }
+{% endfor %}
+}
+{% endif %}

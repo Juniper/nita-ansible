@@ -1,0 +1,56 @@
+#jinja2:lstrip_blocks: True
+system {
+    host-name {{ inventory_hostname }};
+    root-authentication {
+        encrypted-password "{{ password_hashes.root_user }}"; # SECRET-DATA
+    }
+    services {
+        ssh {
+            root-login allow;
+        }
+        netconf {
+            ssh;
+        }
+        rest {
+            http {
+                port 3000;
+            }
+            enable-explorer;
+        }
+    }
+    login {
+        message "{{ login_message }}";
+        user jcluser {
+            class super-user;
+            uid 2000;
+            authentication {
+                encrypted-password "{{ password_hashes.netadmin_user }}";
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any any;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+    {% if ntp_server is defined %}
+    ntp {
+	server {{ ntp_server }};
+    }
+    {% endif %}
+    {% if time_zone is defined %}
+    time-zone {{ time_zone }};
+    {% endif %}
+}

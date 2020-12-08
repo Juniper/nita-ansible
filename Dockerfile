@@ -39,14 +39,13 @@ RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
 COPY requirements.yml .
 RUN ansible-galaxy collection install -r requirements.yml -p /etc/ansible/roles
 
-COPY roles.tar.gz .
-RUN tar -zxvf roles.tar.gz
-RUN cd ebgp-ip-fabric && bash install.sh
-RUN cd evpn-vxlan-common && bash install.sh
-RUN cd evpn-vxlan-fi && bash install.sh
-RUN cd evpn-vxlan-erb && bash install.sh
-RUN cd evpn-vxlan-hb && bash install.sh
-RUN cd evpn-vxlan-sb && bash install.sh
+COPY network-roles network-roles
+RUN cd network-roles/ebgp-ip-fabric && bash install.sh
+RUN cd network-roles/evpn-vxlan-common && bash install.sh
+RUN cd network-roles/evpn-vxlan-fi && bash install.sh
+RUN cd network-roles/evpn-vxlan-erb && bash install.sh
+RUN cd network-roles/evpn-vxlan-hb && bash install.sh
+RUN cd network-roles/evpn-vxlan-sb && bash install.sh
 
 WORKDIR /project
 VOLUME /project

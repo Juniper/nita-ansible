@@ -1,0 +1,4 @@
+---
+- name: Creating common system config
+  template: src=system.j2 dest={{ tmp_dir }}/system.cfg
+

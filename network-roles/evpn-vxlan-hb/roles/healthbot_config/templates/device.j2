@@ -1,0 +1,22 @@
+healthbot {
+    device {{ inventory_hostname }} {
+        host {{ management_interface.ip }};
+        open-config {
+            port 32767;
+        }
+        iAgent {
+            port 830;
+        }
+        authentication {
+            password {
+                username "{{ netconf_user }}";
+                password "{{ netconf_passwd }}";
+            }
+        }
+        vendor {
+            juniper {
+                operating-system junos;
+            }
+        }
+   }
+}

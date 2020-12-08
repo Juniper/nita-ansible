@@ -1,0 +1,60 @@
+{% if evpn_port is defined %}
+interfaces {
+{% for port in evpn_port %}
+    {{ port.interface }} {
+{% if port.esi is defined %}
+        esi {
+            {{ port.esi }};
+            all-active;
+        }
+        aggregated-ether-options{
+            lacp {
+                active;
+                periodic fast;
+                system-id {{ port.system_id }};
+            }
+        }
+{% endif %}
+{% if port.vlan_id is defined %}
+        vlan-tagging;
+{% endif %}
+        unit {{ port.vlan_id | default("0", true) }} {
+{% if port.description is defined %}
+            description "{{ port.description }}";
+{% endif %}
+{% if port.members is defined %}
+            family {
+                ethernet-switching {
+                    vlan {
+{% for item in port.members %}
+                        members {{ item.id }};
+{% endfor %}
+                    }
+                }
+            }
+{% else %}
+{% if port.vlan_id is defined %}
+            vlan-id {{ port.vlan_id }};
+{% endif %}
+{% if port.ip is defined %}
+            family {
+                inet {
+                    address {{ port.ip }};
+                }
+            }
+{% endif %}
+{% endif %}
+        }
+    }
+{% if port.lag_members is defined %}
+{% for item in port.lag_members %}
+    {{ item.interface }} {
+        ether-options {
+            802.3ad {{ port.interface }};
+        }
+    }
+{% endfor %}
+{% endif %}
+{% endfor %}
+}
+{% endif %}

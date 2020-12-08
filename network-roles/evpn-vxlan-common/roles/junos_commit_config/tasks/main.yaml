@@ -1,0 +1,24 @@
+---
+- name: Assembling configurations
+  assemble:
+    src={{ tmp_dir }}
+    dest={{ junos_conf }}
+    mode={{ conf_file_mode | default('666') }}
+    regexp=.+\.cfg
+
+- name: Pushing config ... please wait
+  juniper_junos_config:
+      user: "{{ netconf_user }}"
+      passwd: "{{ netconf_passwd }}"
+      load: 'override'
+      src: "{{ junos_conf }}"
+      commit: true
+      diffs_file: "{{build_dir}}/log/{{ inventory_hostname }}-diff.log"
+      logfile: "{{ log }}"
+      comment: "Committed using NITA"
+      timeout: "{{ netconf_timeout | default('300') }}"
+  register: response
+- name: Commit response
+  debug:
+      var: response
+

@@ -1,0 +1,26 @@
+interfaces {
+{% for vni in vnis %}
+    irb {
+        unit {{ vni.id }} {
+            family inet {
+{% for item in vni.irb_ips %}        
+                address {{ item.ip }};
+{% endfor %}
+            }
+            mac {{ vni.irb_mac }};
+        }
+    }
+{% endfor %}
+}
+
+vlans {
+{% for vni in vnis %}
+    vlan_{{ vni.id }} {
+        vlan-id {{ vni.id }};
+        l3-interface irb.{{ vni.id }};
+        vxlan {
+            vni {{ vni.id }};
+        }
+    }
+{% endfor %}
+}

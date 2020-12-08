@@ -1,0 +1,10 @@
+#jinja2:lstrip_blocks: True
+snmp {
+    location "{{ snmp.location }}";
+    contact "{{ snmp.contact }}";
+    {% for community in snmp.communities %}
+    community {{ community.name }} {
+        authorization read-only;
+    }
+    {% endfor %}
+}

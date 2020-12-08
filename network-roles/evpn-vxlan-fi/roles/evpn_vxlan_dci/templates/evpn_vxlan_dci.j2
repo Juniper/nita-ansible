@@ -1,0 +1,35 @@
+#jinja2:lstrip_blocks: True
+{% if dci_ebgp is defined %}
+protocols {
+    bgp {
+{% for bgp in dci_ebgp %}
+        group {{ bgp.group }} {
+            type external;
+            local-address "{{ loopback_ip }}";
+            local-as "{{ autonomous_system }}";
+            multipath {
+                multiple-as;
+            }
+            multihop {
+                no-nexthop-change;
+            }
+            family evpn {
+                signaling {
+                    delay-route-advertisements {
+                        minimum-delay {
+                            routing-uptime 480;
+                        }
+                    }
+                }
+            }
+{% for neighbor in bgp.neighbors %}
+            neighbor {{ neighbor.name }} {
+                description "DCI EBGP peering to {{ neighbor.name }}";
+                peer-as {{ neighbor.asn }};
+            }
+{% endfor %}
+        }
+{% endfor %}
+    }
+}
+{% endif %}

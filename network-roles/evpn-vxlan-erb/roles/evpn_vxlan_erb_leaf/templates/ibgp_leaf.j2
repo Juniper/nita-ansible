@@ -1,0 +1,40 @@
+protocols {
+    bgp {
+{% for bgp in evpn_ibgp %}
+        group {{ bgp.group }} {
+            type internal;
+            local-address {{ loopback_ip }};
+            family evpn {
+                signaling;
+            }
+            cluster {{ loopback_ip }};
+            local-as {{ autonomous_system }};
+            multipath;
+{% for neighbor in bgp.neighbors %}
+            neighbor {{ neighbor.name }};
+{% endfor %}
+        }
+{% endfor %}
+    }
+    evpn {
+        encapsulation vxlan;
+        multicast-mode ingress-replication;
+        default-gateway do-not-advertise;
+{% if leaf_type != "border" %}	
+        extended-vni-list all;
+{% endif %}	
+{%if collapsed_spine is defined %}
+{%if collapsed_spine %}
+        no-core-isolation;
+{% endif %}
+{% endif %}
+    }
+}
+switch-options {
+    vtep-source-interface lo0.0;
+    route-distinguisher {{ loopback_ip }}:9999;
+    vrf-target {
+        target:9999:9999;
+        auto;
+   }
+}

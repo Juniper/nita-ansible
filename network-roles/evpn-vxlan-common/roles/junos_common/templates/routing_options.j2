@@ -1,0 +1,18 @@
+routing-options {
+{% if loopback_ip is defined %}
+    router-id {{ loopback_ip }};
+{% endif %}
+{% if routing_options is defined %}
+{% for route in routing_options %}
+    {% if route.destination == "discard" %}
+    static {
+        route {{ route.static }} {{ route.destination }};
+    }
+    {% else %}
+    static {
+        route {{ route.static }} next-hop {{ route.destination }};
+    }
+    {% endif %}
+{% endfor %}
+{% endif %}
+}

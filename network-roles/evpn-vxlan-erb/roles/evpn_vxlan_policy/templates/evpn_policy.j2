@@ -1,0 +1,41 @@
+{% if export_policies is defined %}
+{% for policy in export_policies %}
+policy-options {
+    policy-statement {{ policy.name }}_exp {
+        term export_local  {
+            from protocol direct;
+            then {
+                community add {{ policy.name }}_comm;
+                accept;
+            }
+        }
+        term export {
+            then {
+                community add {{ policy.name }}_comm;
+                accept;
+            }
+        }
+    }
+    community {{ policy.name }}_comm members {{ policy.target }};
+}
+{% endfor %}
+{% endif %}
+{% if import_policies is defined %}
+{% for policy in import_policies %}
+policy-options {
+    policy-statement {{ policy.name }}_imp {
+        term bgp {
+            from {
+{% for community in policy.communities %}
+                community {{ community.name }}_comm;
+{% endfor %}
+            }
+            then accept;
+        }
+        term end {
+            then reject;
+        }
+    }
+}
+{% endfor %}
+{% endif %}
