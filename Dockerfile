@@ -36,7 +36,7 @@ RUN pip3 install -r requirements.txt
 
 RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/  
 COPY requirements.yml .
-RUN ansible-galaxy collection install -r requirements.yml -p /etc/ansible/roles
+RUN ansible-galaxy collection install -r requirements.yml
 
 COPY network-roles network-roles
 RUN cd network-roles/ebgp-ip-fabric && bash install.sh
