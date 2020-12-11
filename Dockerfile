@@ -25,7 +25,7 @@ ENV PLAYBOOK="playbook.yml"
 RUN apk add --no-cache sudo \
     python3 py3-pip openssl ca-certificates git \
     gcc libxml2-dev libxslt-dev musl-dev \
-    bash python3-dev openssh-server \
+    bash python3-dev openssh expect sshpass \
     libffi-dev openssl-dev build-base curl \
     ansible=2.9.14-r0
 
