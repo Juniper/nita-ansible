@@ -2,7 +2,7 @@
 
 spawn docker-compose -p healthbot -f /var/local/healthbot/healthbot_mgd.yaml exec mgd /usr/sbin/cli
 expect "> "
-send "request healthbot load\n"
+send "request healthbot load | no-more\n"
 expect "> "
 send "configure\n"
 expect "# "
