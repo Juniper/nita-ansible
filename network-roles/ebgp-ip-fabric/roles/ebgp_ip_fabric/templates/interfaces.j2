@@ -13,14 +13,6 @@
 ##
 ## ********************************************************
 interfaces {
-   em1 {
-       unit 0 {
-           description "*** to pfe ***"
-           family inet {
-               address 169.254.0.2/24;
-           }
-       }
-   }
 {% for intf in core_interfaces %}
     {{ intf.int }} {
 {% if intf.desc is defined %}
@@ -38,19 +30,6 @@ interfaces {
 {% endif %}
     }
 {% endfor %}
-
-    {{ management_interface.int }} {
-        unit 0 {
-            description "*** management ***";
-            family inet {
-{% if management_interface.ip is defined %}
-                address {{ management_interface.ip }}/{{ management_interface.mask }};
-{% else %}
-                dhcp;
-{% endif %}
-            }
-        }
-    }
 
     lo0 {
         unit 0 {
