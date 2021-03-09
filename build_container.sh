@@ -13,4 +13,4 @@
 #
 # ********************************************************
 
-docker build -t juniper/nita-ansible:20.10-1 .
+docker build -t juniper/nita-ansible:21.3-1 .
