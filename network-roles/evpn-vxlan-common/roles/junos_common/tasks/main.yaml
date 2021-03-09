@@ -1,4 +1,7 @@
 ---
+- name: Creating management interface
+  template: src=management_interface.j2 dest={{ tmp_dir }}/management_interface.cfg
+
 - name: Creating common SNMP config
   template: src=snmp.j2 dest={{ tmp_dir }}/snmp.cfg
 
