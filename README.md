@@ -57,6 +57,46 @@ If you have been provided with the .rpm package file, then follow the instructio
 ```bash
 sudo yum install ./nita-ansible-2.9.14-20.10-1.noarch.rpm
 ```
+# Using nita-ansible 
+
+This container holds Ansible executables, related libraries, and files for managing Juniper devices using Ansible. The NITA framework uses the nita-ansible container to run ansible playbooks included with the framework. Nita-ansible can also be used as standalone container for executing your own playbooks. Simply put your inventory file and playbooks into a project folder on the system hosting the container. You will also want to put a bash script to execute ```ansible-playbook``` command. 
+
+### Simple Project Folder Example
+
+A simple project folder with a single playbook may look like like this:
+
+```
+-rw-rw-r-- 1 auser auser  972 Jun  4 16:21 playbook.yml
+-rw-rw-r-- 1 auser auser  148 Jun  4 10:42 hosts
+-rwxrwxr-x 1 auser auser  136 Jun  4 16:22 runme.sh
+```
+
+The ```runme.sh``` should execute the playbook pointing to the hosts file as follows:
+
+```
+#!/bin/bash
+ansible-playbook -i hosts playbook.yml 
+```
+
+### Using nita-ansible with your project folder
+
+To use the nita-ansible container with your project folder, simply use the ```docker run``` command, mounting your project folder onto the container and passing the command to run your script like the example below:
+
+```
+docker run -u root -v /project_folder:/container_folder:rw  --rm  -it --name ansible juniper/nita-ansible:<version> /bin/bash -c "cd /container_folder; ./runme.sh"
+```
+
+### Troubleshooting playbooks
+
+You can execute the playbook into a bash shell and troubleshoot from the project folder mounted inside the container if your playbooks are not operating correctly by issuing the ```docker run``` command above with just the bash shell (remove everything after ```/bin/bash```).
+
+### Additional roles
+
+If you need additional roles for your playbooks, create a folder in project directory called ```roles``` and copy the appropriate files from your local ansible installation's role folder. Ansible will look in ```/container_folder/roles``` for any roles that are not already installed in the container itself.
+
+### Examples
+
+More complex examples of project folders can be found in the larger NITA project itself, particularly at https://github.com/Juniper/nita-webapp/tree/main/examples
 
 # Misc
 
