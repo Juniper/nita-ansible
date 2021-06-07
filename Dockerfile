@@ -27,14 +27,14 @@ RUN apk add --no-cache sudo \
     gcc libxml2-dev libxslt-dev musl-dev \
     bash python3-dev openssh expect sshpass \
     libffi-dev openssl-dev build-base curl \
-    ansible=2.9.14-r0 vim
+    ansible=2.9.18-r0 vim
 
 # copy requirements.txt for Python and install
 WORKDIR /tmp
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/  
+RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
 COPY requirements.yml .
 RUN ansible-galaxy collection install -r requirements.yml
 
