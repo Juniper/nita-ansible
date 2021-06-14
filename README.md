@@ -191,16 +191,15 @@ In the sample Excel file included with the NITA package for EVPN data center men
     - { role: evpn_vxlan_vni }
 ```
 
-### evpn_vxlan_vrf and evpn_vxlan_policy
+### evpn_vxlan_vrf
 
-Builds the configuration stanzas that make up  VRF and related import/export policies for EVPN VXLAN configuration. In the sample Excel file included with the NITA package for EVPN data center mentioned above, the tabs that hold the variable information include "vrfs+" (and indirectly "vnis+". The example datacenter uses route-targets and does not create unique policies for each VRF. Invoking these roles from an ansible playbook can be accomplished as follows:
+Builds the configuration stanzas that make up VRF for EVPN VXLAN configuration. In the sample Excel file included with the NITA package for EVPN data center mentioned above, the tabs that hold the variable information include "vrfs+" (and indirectly "vnis+". The example datacenter uses route-targets and does not create unique policies for each VRF. Invoking this role from an ansible playbook can be accomplished as follows:
 
 ```
 - hosts: leaves
   connection: local
   roles:
     - { role: evpn_vxlan_vrf }
-    - { role: evpn_vxlan_policy }
 ```
 
 ### Junos_common 
