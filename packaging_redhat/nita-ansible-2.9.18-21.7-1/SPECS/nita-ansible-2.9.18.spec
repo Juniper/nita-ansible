@@ -16,8 +16,8 @@
 %define          debug_package %{nil}
 %define        __os_install_post %{_dbpath}/brp-compress
 
-Name:           nita-ansible-2.9.14
-Version:        20.10
+Name:           nita-ansible-2.9.18
+Version:        21.7
 Release:        1
 Summary:        Network Implementation and Test Automation
 Group:          Development/Tools
@@ -64,5 +64,7 @@ if [ $(getenforce) != Permissive ]; then echo "******  Please disable SELinux du
 %{_prefix}/local/bin/*
 
 %changelog
+* Sat Aug 7 2021 Hugo Ribeiro  21.7-1
+  - Updated broken dependencies
 * Wed Sep 23 2020 Hugo Ribeiro  20.10-1
   - OS Release

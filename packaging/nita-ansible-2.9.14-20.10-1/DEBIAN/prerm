@@ -1,3 +1,0 @@
-#!/bin/bash
-
-bash /etc/nita-ansible-20.10/remove.sh

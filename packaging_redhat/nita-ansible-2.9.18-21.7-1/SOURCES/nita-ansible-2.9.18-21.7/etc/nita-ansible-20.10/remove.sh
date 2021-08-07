@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # ********************************************************
 #
 # Project: nita-ansible
@@ -12,7 +13,26 @@
 # Third-Party Code: This code may depend on other components under separate copyright notice and license terms. Your use of the source code for those components is subject to the terms and conditions of the respective license as noted in the Third-Party source code file.
 #
 # ********************************************************
-        echo -n "    nita-cmd ansible cli 20.10 => "
-        echo `cat <<EOT
-Starts an ansible container (version 20.10) command line shell interface in the /project directory.
-EOT` >&2
+
+PACKAGE=nita-ansible-2.9.18
+VERSION=21.7-1
+
+# stop the script if a command fails
+#set -e
+#set -x
+
+# wait 15 seconds for the containers to exit
+sleep 15
+
+# remove exited containers:
+docker ps --filter status=dead --filter status=exited -aq | xargs -r docker rm -v
+
+# remove unused volumes:
+docker volume ls -qf dangling=true | xargs -r docker volume rm
+
+# remove docker images
+docker rmi -f juniper/nita-ansible:21.7-1
+docker rmi -f juniper/nita-ansible:_nita_release_$VERSION
+
+# remove unused images
+docker images --no-trunc | grep '<none>' | awk '{ print $3 }' | xargs -r docker rmi

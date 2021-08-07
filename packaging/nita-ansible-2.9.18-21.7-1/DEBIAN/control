@@ -1,5 +1,5 @@
-Package: nita-ansible-2.9.14
-Version: 20.10-1
+Package: nita-ansible-2.9.18
+Version: 21.7-1
 Section: base
 Priority: optional
 Architecture: all

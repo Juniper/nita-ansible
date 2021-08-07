@@ -46,7 +46,7 @@ If you do not have the the required package files for your system, .deb for Ubun
 If you have been provided with the .deb package file, then follow the instructions provided in the [Dependencies](##Dependencies) section above and then run the following command:
 
 ```bash
-sudo apt-get install ./nita-ansible-2.9.14-21.7-1.deb
+sudo apt-get install ./nita-ansible-2.9.18-21.7-1.deb
 ```
 
 ### Centos
@@ -55,11 +55,11 @@ If you have been provided with the .rpm package file, then follow the instructio
 
 
 ```bash
-sudo yum install ./nita-ansible-2.9.14-21.7-1.noarch.rpm
+sudo yum install ./nita-ansible-2.9.18-21.7-1.noarch.rpm
 ```
-# Using nita-ansible 
+# Using nita-ansible
 
-This container holds Ansible executables, related libraries, and files for managing Juniper devices using Ansible. The NITA framework uses the nita-ansible container to run ansible playbooks included with the framework. Nita-ansible can also be used as standalone container for executing your own playbooks. Simply put your inventory file and playbooks into a project folder on the system hosting the container. You will also want to put a bash script to execute ```ansible-playbook``` command. 
+This container holds Ansible executables, related libraries, and files for managing Juniper devices using Ansible. The NITA framework uses the nita-ansible container to run ansible playbooks included with the framework. Nita-ansible can also be used as standalone container for executing your own playbooks. Simply put your inventory file and playbooks into a project folder on the system hosting the container. You will also want to put a bash script to execute ```ansible-playbook``` command.
 
 ### Simple Project Folder Example
 
@@ -75,7 +75,7 @@ The ```runme.sh``` should execute the playbook pointing to the hosts file as fol
 
 ```
 #!/bin/bash
-ansible-playbook -i hosts playbook.yml 
+ansible-playbook -i hosts playbook.yml
 ```
 
 ### Using nita-ansible with your project folder
@@ -90,7 +90,7 @@ docker run -u root -v /project_folder:/container_folder:rw  --rm  -it --name ans
 
 You can execute the playbook into a bash shell and troubleshoot from the project folder mounted inside the container if your playbooks are not operating correctly by issuing the ```docker run``` command above with just the bash shell (remove everything after ```/bin/bash```).
 
-# Roles 
+# Roles
 
 ## Built-in roles
 
@@ -146,7 +146,7 @@ Builds the configuration stanzas that make up a eBGP routing for DCI connectivit
 
 ### evpn_vxlan_erb_leaf
 
-Builds the configuration stanzas that make up iBGP EVPN overlay configuration for leafs in spine/leaf IP fabric. Also includes configuration for related switch-options stanza in Junos (vtep source interface, route-distinguisher, vrf-target). 
+Builds the configuration stanzas that make up iBGP EVPN overlay configuration for leafs in spine/leaf IP fabric. Also includes configuration for related switch-options stanza in Junos (vtep source interface, route-distinguisher, vrf-target).
 In the sample Excel file included with the NITA package for EVPN data center mentioned above, the tabs that hold the variable information include "evpn_ibgp+" and "base". Invoking this role from an ansible playbook can be accomplished as follows:
 
 ```
@@ -158,7 +158,7 @@ In the sample Excel file included with the NITA package for EVPN data center men
 
 ### evpn_vxlan_erb_spine
 
-Builds the configuration stanzas that make up iBGP EVPN overlay "lean" spines as iBGP route-reflectors for family evpn signaling. Of particular interest the configuration implicitly allows all neighbors from the defined loopback_subnet. This means all the leafs will initiate the BGP connection. 
+Builds the configuration stanzas that make up iBGP EVPN overlay "lean" spines as iBGP route-reflectors for family evpn signaling. Of particular interest the configuration implicitly allows all neighbors from the defined loopback_subnet. This means all the leafs will initiate the BGP connection.
 In the sample Excel file included with the NITA package for EVPN data center mentioned above,  the tabs that hold the variable information include "evpn_ibgp+" and "base". Invoking this role from an ansible playbook can be accomplished as follows:
 
 ```
@@ -179,9 +179,9 @@ Builds the configuration stanzas that make up L2 port information for devices co
     - { role: evpn_vxlan_port }
 ```
 
-### evpn_vxlan_vni 
+### evpn_vxlan_vni
 
-Builds the configuration stanzas that make up VNI information for EVPN VXLAN configuration. 
+Builds the configuration stanzas that make up VNI information for EVPN VXLAN configuration.
 In the sample Excel file included with the NITA package for EVPN data center mentioned above, the tabs that hold the variable information include "vnis+". Invoking this role from an ansible playbook can be accomplished as follows:
 
 ```
@@ -202,7 +202,7 @@ Builds the configuration stanzas that make up VRF for EVPN VXLAN configuration. 
     - { role: evpn_vxlan_vrf }
 ```
 
-### Junos_common 
+### Junos_common
 
 Builds the configuration stanzas that make that includes configuration stanzas common to all junos devices. Configures ethernet device aggregation in chassis, grpc under system services, management interface (will configures DHCP if no IP address isn't defined), static routes under routing-options, and snmp. It is invoked:
 
@@ -264,7 +264,7 @@ If you need additional roles for your playbooks, create a folder in project dire
 
 This role is not actually included in the default container build but is an example of a role that can be added via the project. This role is located at https://github.com/Juniper/nita-webapp/tree/main/examples/ebgp_wan and NITA loads it under the roles folder in the project folder.
 
-This role contains junos configuration statements for the MX router in the WAN role in the NITA example project. 
+This role contains junos configuration statements for the MX router in the WAN role in the NITA example project.
 
 # Examples
 

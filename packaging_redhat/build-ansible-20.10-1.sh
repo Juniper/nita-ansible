@@ -17,8 +17,8 @@
 # stop the script if a command fails
 set -e
 
-PACKAGE=nita-ansible-2.9.14
-VERSION=20.10
+PACKAGE=nita-ansible-2.9.18
+VERSION=21.7
 RELEASE=1
 
 # cleanup version if the directory name is used
@@ -62,7 +62,7 @@ mkdir -p ${IMAGEDIR}
     cd ..
     ./build_container.sh
 )
-docker save juniper/nita-ansible:20.10-1 | gzip > ${IMAGEDIR}/nita-ansible-${VERSION}-${RELEASE}.tar.gz
+docker save juniper/nita-ansible:21.7-1 | gzip > ${IMAGEDIR}/nita-ansible-${VERSION}-${RELEASE}.tar.gz
 
 # Create a tarball of with source
 (
