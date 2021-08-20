@@ -6,7 +6,7 @@ Packages built from this branch will be nita-*-21.7-x where x is the packaging r
 This branch also contains patches from other branches or minor modifications as required to support the stability and usability of the release.
 There are also some backwards compatibility packages here for ansible and robot that allow projects written for NITA 3.0.7 to work without having to make any changes.
 
-Note that NITA 21.7 backward compatible with NITA 20.10 projects, provided the correct ansible and robot containers are installed.
+Note that NITA 21.7 is backward compatible with NITA 20.10 projects, provided the correct ansible and robot containers are installed.
 
 # Copyright
 
@@ -33,13 +33,13 @@ No containers tagged as "latest" are provided by the package.
 
 NITA depends on docker-ce and docker-compose.
 
-* For the **docker-ce** instalation the instructions found here: https://docs.docker.com/engine/install/
-* It is recomended to follow this steps after installing docker-ce: https://docs.docker.com/engine/install/linux-postinstall/
+* For the **docker-ce** installation the instructions found here: https://docs.docker.com/engine/install/
+* It is recommended to follow this steps after installing docker-ce: https://docs.docker.com/engine/install/linux-postinstall/
 * To install **docker-compose** follow the instructions found here: https://docs.docker.com/compose/install/
 
 ## Installation
 
-If you do not have the the required package files for your system, .deb for Ubuntu or .rpm for Centos refer to [BUILD.md](./BUILD.md) file for instructions on how to generate these files.
+If you do not have the the required package files for your system, .deb for Ubuntu or .rpm for Centos refer to [BUILD.md](./BUILD.md) file for instructions on how to generate them.
 
 ### Ubuntu
 
@@ -59,11 +59,11 @@ sudo yum install ./nita-ansible-2.9.18-21.7-1.noarch.rpm
 ```
 # Using nita-ansible
 
-This container holds Ansible executables, related libraries, and files for managing Juniper devices using Ansible. The NITA framework uses the nita-ansible container to run ansible playbooks included with the framework. Nita-ansible can also be used as standalone container for executing your own playbooks. Simply put your inventory file and playbooks into a project folder on the system hosting the container. You will also want to put a bash script to execute ```ansible-playbook``` command.
+This container holds Ansible executables, related libraries, and files for managing Juniper devices using Ansible. The NITA framework uses the nita-ansible container to run ansible playbooks included with the framework. Nita-ansible can also be used as a standalone container for executing your own playbooks. Simply put your inventory file and playbooks into a project folder on the system hosting the container. You will also want to put a bash script to execute the ```ansible-playbook``` command.
 
 ### Simple Project Folder Example
 
-A simple project folder with a single playbook may look like like this:
+A simple project folder with a single playbook may look like this:
 
 ```
 -rw-rw-r-- 1 auser auser  972 Jun  4 16:21 playbook.yml
