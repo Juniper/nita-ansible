@@ -272,4 +272,4 @@ More complex examples of project folders can be found in the larger NITA project
 
 # Misc
 
-For more information on NITA releases refer to the [README.md](./README.md) for the NITA Webapp <link to that>
+For more information on NITA releases refer to the [README.md](https://github.com/Juniper/nita-webapp/blob/21.7/README.md) for the NITA Webapp.
