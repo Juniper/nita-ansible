@@ -4,7 +4,7 @@
 #
 # Project: nita-ansible
 #
-# Copyright (c) Juniper Networks, Inc., 2020. All rights reserved.
+# Copyright (c) Juniper Networks, Inc., 2021. All rights reserved.
 #
 # Notice and Disclaimer: This code is licensed to you under the Apache 2.0 License (the "License"). You may not use this code except in compliance with the License. This code is not an official Juniper product. You can obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0.html
 #
@@ -17,8 +17,9 @@
 # stop the script if a command fails
 set -e
 
-PACKAGE=nita-ansible-2.9.14
-VERSION=20.10-1
+PACKAGE=nita-ansible-2.9.18
+VERSION=21.7
+RELEASE=1
 
 # cleanup version if the directory name is used
 VTMP="${VERSION#$PACKAGE-}"
@@ -30,39 +31,46 @@ if [[ "x$VERSION" == "x" ]]; then
     exit 1
 fi
 
-if [ ! -d ${PACKAGE}-${VERSION} ]; then
-    echo "Directory ${PACKAGE}-${VERSION} does not exist"
+if [ ! -d ${PACKAGE}-${VERSION}-${RELEASE} ]; then
+    echo "Directory ${PACKAGE}-${VERSION}-${RELEASE} does not exist"
 fi
 
 # installing docker-ce on host
-if dpkg-query -s docker-ce >/dev/null 2>&1; then
+if (yum list installed | grep docker-ce) >/dev/null 2>&1; then
     echo "docker-ce already installed"
 else
-    apt-get -y update
-    apt-get -y install apt-transport-https ca-certificates curl \
-        software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg |apt-key add -
-    apt-key fingerprint 0EBFCD88
-    add-apt-repository \
-       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-       $(lsb_release -cs) stable"
-    apt-get -y update
-    apt-get -y install docker-ce
+    yum install -y yum-utils rpm-build
+    yum-config-manager \
+        --add-repo \
+        https://download.docker.com/linux/centos/docker-ce.repo
+    yum update -y
+    yum install -y docker-ce
+    systemctl start docker
 fi
 
+SOURCE_DIR=${PACKAGE}-${VERSION}-${RELEASE}/SOURCES
+
 # copy cli scripts
-SCRIPTSDIR=${PACKAGE}-${VERSION}/usr/local/bin
+SCRIPTSDIR=${SOURCE_DIR}/${PACKAGE}-${VERSION}/usr/local/bin
 mkdir -p ${SCRIPTSDIR}
 install -m 755 ../cli_scripts/* ${SCRIPTSDIR}
 
 # pull all the required containers
-IMAGEDIR=${PACKAGE}-${VERSION}/usr/share/${PACKAGE}/images
+IMAGEDIR=${SOURCE_DIR}/${PACKAGE}-${VERSION}/usr/share/${PACKAGE}/images
 mkdir -p ${IMAGEDIR}
-
 (
     cd ..
     ./build_container.sh
 )
-docker save juniper/nita-ansible:20.10-1 | gzip > ${IMAGEDIR}/nita-ansible-20.10-1.tar.gz
+docker save juniper/nita-ansible:21.7-1 | gzip > ${IMAGEDIR}/nita-ansible-${VERSION}-${RELEASE}.tar.gz
 
-dpkg-deb --build ${PACKAGE}-${VERSION}
+# Create a tarball of with source
+(
+    cd ${SOURCE_DIR}
+    tar czf ${PACKAGE}-${VERSION}.tar.gz ${PACKAGE}-${VERSION}
+)
+
+# Build rpm file
+export RPM_BUILD_DIR="${PWD}/${PACKAGE}-${VERSION}-${RELEASE}"
+cp .rpmmacros ~
+rpmbuild -ba ${PACKAGE}-${VERSION}-${RELEASE}/SPECS/${PACKAGE}.spec
