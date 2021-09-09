@@ -204,7 +204,7 @@ Builds the configuration stanzas that make up VRF for EVPN VXLAN configuration. 
 
 ### Junos_common
 
-Builds the configuration stanzas that make that includes configuration stanzas common to all junos devices. Configures ethernet device aggregation in chassis, grpc under system services, management interface (will configures DHCP if no IP address isn't defined), static routes under routing-options, and snmp. It is invoked:
+Builds the configuration stanzas that make that includes configuration stanzas common to all junos devices. Configures ethernet device aggregation in chassis, grpc under system services, management interface (will configure DHCP if no IP address is assigned), static routes under routing-options, and snmp. It is invoked:
 
 ```
 - hosts: switches
