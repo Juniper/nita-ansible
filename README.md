@@ -270,6 +270,10 @@ This role contains junos configuration statements for the MX router in the WAN r
 
 More complex examples of project folders can be found in the larger NITA project itself, particularly at https://github.com/Juniper/nita-webapp/tree/main/examples
 
+# Ansible 2.10 and greater
+
+Starting with Ansible 2.10, juniper.device ansible collection is supported. This collection has been added to the requirements.yml file and will be built-in the container automatically. The roles listed above are still supported and work with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html
+
 # Misc
 
 For more information on NITA releases refer to the [README.md](https://github.com/Juniper/nita-webapp/blob/21.7/README.md) for the NITA Webapp.
