@@ -272,7 +272,7 @@ More complex examples of project folders can be found in the larger NITA project
 
 # Ansible 2.10 and greater
 
-Starting with Ansible 2.10, juniper.device ansible collection is supported. This collection has been added to the requirements.yml file and will be built-in the container automatically. The roles listed above are still supported and work with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html
+Starting with Ansible 2.10, juniper.device ansible collection is added. This collection has been included in the requirements.yml file and will be built-in the container automatically. The roles listed above are still supported and work with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. Currently it is recommended to continue to use the juniper.junos roles versus juniper.device collection as the collections per the galxy website. 
 
 # Misc
 
