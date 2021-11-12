@@ -5,6 +5,7 @@
     dest={{ junos_conf }}
     mode={{ conf_file_mode | default('666') }}
     regexp=.+\.cfg
+# Use for Ansible 2.9 and lower
 # - name: Pushing config ... please wait
 #   juniper_junos_config:
 #       user: "{{ netconf_user }}"
@@ -20,6 +21,10 @@
 # - name: Commit response
 #   debug:
 #       var: response
+#
+#
+# Use section below for device collection use for Ansible 2.10 and greater...
+#
 - name: Pushing config ... please wait
   config:
       user: "{{ netconf_user }}"
