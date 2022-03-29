@@ -27,6 +27,10 @@ It allows NITA projects to declare exactly which version of NITA they are compat
 Projects must explicitly use the versions of the containers provided by this package in order to avoid docker attempting to download from the registry.
 No containers tagged as "latest" are provided by the package.
 
+## Ansible 2.10 and greater
+
+Starting with Ansible 2.10, juniper.device ansible collection is added. This collection has been included in the requirements.yml file and will be built-in the container automatically. Existing juniper.junos role is still supported and works with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. As of juniper.device collection 1.0.1 it is still currently recommended to continue to use the juniper.junos roles versus juniper.device collection per the galxy website. 
+
 # Installing
 
 ## Dependencies
@@ -132,6 +136,8 @@ Builds the configuration stanzas that make up a Junos policy and routing options
   roles:
     - { role: evpn_vxlan_common }
 ```
+
+Included in the evpn_vxlan_common role is <b>junos_commit_config</b> role which includes examples for using juniper.junos roles (commented out) and juniper.device collection (see <b>ansible 2.10 and greater</b> above)
 
 ### evpn_vxlan_dci
 
@@ -269,6 +275,7 @@ This role contains junos configuration statements for the MX router in the WAN r
 # Examples
 
 More complex examples of project folders can be found in the larger NITA project itself, particularly at https://github.com/Juniper/nita-webapp/tree/main/examples
+
 
 # Misc
 

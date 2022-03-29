@@ -12,7 +12,7 @@
 #
 # ********************************************************
 
-FROM alpine:3.12.1
+FROM alpine:3.15.0
 
 # ==> Specify Python requirements filename;   default = "requirements.txt"
 # ==> Specify Ansible requirements filename;  default = "requirements.yml"
@@ -26,8 +26,9 @@ RUN apk add --no-cache sudo \
     python3 py3-pip openssl ca-certificates git \
     gcc libxml2-dev libxslt-dev musl-dev \
     bash python3-dev openssh expect sshpass \
-    libffi-dev openssl-dev build-base curl \
-    ansible=2.9.18-r0 vim
+    libffi-dev openssl-dev build-base curl vim \
+    ansible-core=2.11.6-r1 \
+    ansible=4.8.0-r0
 
 # copy requirements.txt for Python and install
 WORKDIR /tmp

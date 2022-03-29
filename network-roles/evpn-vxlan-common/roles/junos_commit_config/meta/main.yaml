@@ -1,3 +1,5 @@
 ---
 dependencies:
     - { role: Juniper.junos }
+collections:
+    - juniper.device
