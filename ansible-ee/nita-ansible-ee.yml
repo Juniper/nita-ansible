@@ -1,0 +1,15 @@
+---
+version: 1
+dependencies:
+  galaxy: ../requirements.yml
+  python: ../requirements.txt
+
+additional_build_steps:
+  append:  
+    - COPY ../network-roles network-roles
+    - RUN cd ../network-roles/ebgp-ip-fabric && bash install.sh
+    - RUN cd ../network-roles/evpn-vxlan-common && bash install.sh
+    - RUN cd ../network-roles/evpn-vxlan-fi && bash install.sh
+    - RUN cd ../network-roles/evpn-vxlan-erb && bash install.sh
+    - RUN cd ../network-roles/evpn-vxlan-hb && bash install.sh
+    - RUN cd ../network-roles/evpn-vxlan-sb && bash install.sh
