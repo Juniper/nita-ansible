@@ -1,0 +1,93 @@
+#jinja2:lstrip_blocks: True
+## ********************************************************
+##
+## Project: nita-ansible
+##
+## Copyright (c) Juniper Networks, Inc., 2021. All rights reserved.
+##
+## Notice and Disclaimer: This code is licensed to you under the Apache 2.0 License (the "License"). You may not use this code except in compliance with the License. This code is not an official Juniper product. You can obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0.html
+##
+## SPDX-License-Identifier: Apache-2.0
+##
+## Third-Party Code: This code may depend on other components under separate copyright notice and license terms. Your use of the source code for those components is subject to the terms and conditions of the respective license as noted in the Third-Party source code file.
+##
+## ********************************************************
+{% if vrfs is defined %}
+{% for vrf in vrfs %}
+interfaces lo0 {
+    unit {{ vrf.vrf_id }} {
+        description "Loopback for VXLAN control packets for VRF_{{ vrf.vrf_id }}";
+        family inet {
+            address {{ vrf.loopback_ip }}/32;
+        }
+    }
+}
+routing-instances {
+    VRF_{{ vrf.vrf_id }} {
+        instance-type vrf;
+{% if vrf.interfaces is defined %}
+{% for interface in vrf.interfaces %}
+        interface {{ interface.name }};
+{% endfor %}
+{% endif %}
+        interface lo0.{{ vrf.vrf_id }};
+        route-distinguisher {{ vrf.loopback_ip }}:{{ vrf.vrf_id }};
+        vrf-target target:1:{{ vrf.vrf_id }};
+{% if vrf.export is defined %}
+        vrf-export {{ vrf.export }}_exp;
+{% endif %}
+{% if vrf.import is defined %}
+        vrf-import {{ vrf.import }}_imp;
+{% endif %}
+        vrf-table-label;
+        routing-options {
+            auto-export;
+        }
+        protocols {
+            evpn {
+                ip-prefix-routes {
+                    advertise direct-nexthop;
+                    encapsulation vxlan;
+                    vni {{ vrf.vrf_id }};
+                    export EVPN_T5_EXPORT;
+                }
+            }
+{% if vrf.ospf_interfaces is defined %}
+{% for interface in vrf.ospf_interfaces %}
+            ospf {
+                export to-ospf;
+                area 0.0.0.0 {
+                    interface {{ interface.name }} {
+                        metric {{ interface.metric }};
+                    }
+                }
+            }
+{% endfor %}
+{% endif %}
+        }
+    }
+}
+{% if vrf.ospf_interfaces is defined %}
+policy-options {
+    policy-statement to-ospf {
+       term 10 {
+{% if collapsed_spine is defined %}
+{% if collapsed_spine %}
+{% for vni in vnis %}
+{% for interface in vni.irb_ips %}
+           from route-filter {{ interface.subnet }} orlonger;
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% endif %}
+           from protocol evpn;
+           then accept;
+       }
+       term 100 {
+           then reject;
+       }
+   }
+}
+{% endif %}
+{% endfor %}
+{% endif %}

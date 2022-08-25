@@ -1,0 +1,7 @@
+---
+- name: Creating common evpn routing options config
+  template: src=evpn_routing_options.j2 dest={{ tmp_dir }}/evpn_routing_options.cfg
+
+- name: Creating common evpn policy options config
+  template: src=policy_options.j2 dest={{ tmp_dir }}/evpn_policy_options.cfg
+
