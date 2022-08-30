@@ -10,5 +10,5 @@ AWX requires ansible EEs to be pulled from a repository. For testing purposes yo
 ```
 docker run -d -p 5000:5000 --restart always --name registry registry:2.8.1
 docker tag <Ansible-ee-container-image-id> "localhost:5000/ansible-ee"
-docker push 533d90bda9f5 localhost:5000/ansible-ee
+docker push localhost:5000/ansible-ee
 ```
