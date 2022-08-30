@@ -12,3 +12,8 @@ docker run -d -p 5000:5000 --restart always --name registry registry
 docker tag <Ansible-ee-container-image-id> "localhost:5000/ansible-ee"
 docker push localhost:5000/ansible-ee
 ```
+
+After this simply define the localhost:5000/ansible-ee in your definition for an Execution Environment in AWX:
+
+![image](https://user-images.githubusercontent.com/6110061/187557638-8b0e00bf-9cfc-4f53-9ef3-c97e7fdf0ad0.png)
+
