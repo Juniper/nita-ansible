@@ -1,0 +1,42 @@
+action:
+- category: BUILD
+  configuration:
+    shell_command: write_yaml_files.py; docker run -u root -v "/var/nita_project:/project:rw"
+      -v "/var/nita_configs:/var/tmp/build:rw" --rm --name ansible juniper/nita-ansible:21.7-1
+      /bin/bash -c "cd ${WORKSPACE}; bash build.sh ${build_dir}"
+  jenkins_url: build_vmx_wan-wan
+  name: Build(wan)
+- category: BUILD
+  configuration:
+    shell_command: write_yaml_files.py; docker run -u root -v "/var/nita_project:/project:rw"
+      -v "/var/nita_configs:/var/tmp/build:rw" --rm --name ansible juniper/nita-ansible:21.7-1
+      /bin/bash -c "cd ${WORKSPACE}; bash dump.sh ${build_dir}"
+  jenkins_url: dump_vmx_wan-wan
+  name: Dump configuration(wan)
+- category: TEST
+  configuration:
+    output_path: test/outputs/
+    shell_command: write_yaml_files.py; docker run -u root -v "/var/nita_project:/project:rw"
+      -v "/var/nita_configs:/var/tmp/build:rw" --rm --name ansible juniper/nita-ansible:21.7-1
+      /bin/bash -c "cd ${WORKSPACE}; bash test_setup.sh ${build_dir}" write_yaml_files.py;
+      docker run -u root -v "/var/nita_project:/project:rw" -v "/var/nita_configs:/var/tmp/build:rw"
+      --rm --name robot -e ROBOT_OPTIONS="-d ${PWD}/test/outputs" juniper/nita-robot:21.7-1
+      /bin/bash -c "cd ${WORKSPACE}; bash test.sh"
+  jenkins_url: test_vmx_wan-wan
+  name: Test(wan)
+- category: BUILD
+  configuration:
+    shell_command: write_yaml_files.py; docker run -u root -v "/var/nita_project:/project:rw"
+      -v "/var/nita_configs:/var/tmp/build:rw" --rm --name ansible juniper/nita-ansible:21.7-1
+      /bin/bash -c "cd ${WORKSPACE}; bash netbox.sh ${build_dir}"
+  jenkins_url: netbox_population-wan
+  name: Netbox Population(wan)
+- category: BUILD
+  configuration:
+    shell_command: write_yaml_files.py; docker run -u root -v "/var/nita_project:/project:rw"
+      -v "/var/nita_configs:/var/tmp/build:rw" --rm --name ansible juniper/nita-ansible:21.7-1
+      /bin/bash -c "cd ${WORKSPACE}; bash healthbot.sh ${build_dir}"
+  jenkins_url: healthbot_population-wan
+  name: HealthBot Population(wan)
+description: wan created using the NITA webapp
+name: wan
