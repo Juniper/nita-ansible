@@ -33,3 +33,4 @@ RUN cd network-roles/evpn-vxlan-fi && bash install.sh
 RUN cd network-roles/evpn-vxlan-erb && bash install.sh
 RUN cd network-roles/evpn-vxlan-hb && bash install.sh
 RUN cd network-roles/evpn-vxlan-sb && bash install.sh
+COPY network-roles/mx_common/ /etc/ansible/roles/mx_common

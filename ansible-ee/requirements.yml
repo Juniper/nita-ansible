@@ -1,7 +1,7 @@
 ---
   roles:
     # Install a role from Ansible Galaxy.
-    - name: juniper.junos
+    - name: Juniper.junos
       version: '2.4.3'
 
   collections:
