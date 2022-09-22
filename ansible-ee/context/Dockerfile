@@ -16,11 +16,14 @@ FROM $EE_BUILDER_IMAGE as builder
 COPY --from=galaxy /usr/share/ansible /usr/share/ansible
 
 ADD _build/requirements.txt requirements.txt
-RUN ansible-builder introspect --sanitize --user-pip=requirements.txt --write-bindep=/tmp/src/bindep.txt --write-pip=/tmp/src/requirements.txt
+ADD _build/bindep.txt bindep.txt
+RUN ansible-builder introspect --sanitize --user-pip=requirements.txt --user-bindep=bindep.txt --write-bindep=/tmp/src/bindep.txt --write-pip=/tmp/src/requirements.txt
 RUN assemble
 
 FROM $EE_BASE_IMAGE
 USER root
+RUN whoami
+RUN cat /etc/os-release
 
 COPY --from=galaxy /usr/share/ansible /usr/share/ansible
 
@@ -34,3 +37,5 @@ RUN cd network-roles/evpn-vxlan-erb && bash install.sh
 RUN cd network-roles/evpn-vxlan-hb && bash install.sh
 RUN cd network-roles/evpn-vxlan-sb && bash install.sh
 COPY network-roles/mx_common/ /etc/ansible/roles/mx_common
+RUN mkdir -p /var/nita_configs
+RUN mkdir -p /var/tmp/build

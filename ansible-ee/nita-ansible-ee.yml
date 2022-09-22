@@ -5,8 +5,12 @@ build_arg_defaults:
 dependencies:
   galaxy: requirements.yml
   python: requirements.txt
+  system: bindep.txt
 
 additional_build_steps:
+  prepend: |
+    RUN whoami
+    RUN cat /etc/os-release
   append:  
     - COPY network-roles network-roles
     - RUN cd network-roles/ebgp-ip-fabric && bash install.sh
@@ -16,3 +20,5 @@ additional_build_steps:
     - RUN cd network-roles/evpn-vxlan-hb && bash install.sh
     - RUN cd network-roles/evpn-vxlan-sb && bash install.sh
     - COPY network-roles/mx_common/ /etc/ansible/roles/mx_common
+    - RUN mkdir -p /var/nita_configs
+    - RUN mkdir -p /var/tmp/build
