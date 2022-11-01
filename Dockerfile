@@ -12,7 +12,7 @@
 #
 # ********************************************************
 
-FROM amd64/alpine:3.16.1
+FROM amd64/alpine:3.16.2
 
 # ==> Specify Python requirements filename;   default = "requirements.txt"
 # ==> Specify Ansible requirements filename;  default = "requirements.yml"
