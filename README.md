@@ -10,7 +10,7 @@ Note that NITA 23.Y should be backward compatible with NITA 22.8 and 21.7 projec
 
 # Copyright
 
-Copyright 2021, Juniper Networks, Inc.
+Copyright 2023, Juniper Networks, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -95,11 +95,6 @@ When invoking these built-in roles the build-folder needs to be passed to the an
 ```
 ansible-playbook -i hosts playbook.yaml --extra-vars "build_dir=container_build_folder"
 ```
-
-### Juniper.junos
-
-This is the main Junos Ansible 2.9 role and is included in the nita-ansible container. This role allows Ansible to communicate with Junos devices. Information on the functionality that is provided with this Ansible role can found here: https://www.juniper.net/documentation/en_US/junos-ansible/topics/reference/general/junos-ansible-modules-overview.html
-
 ### ebgp_ip_fabric
 
 Builds the configuration stanzas that make up a Junos eBGP IP fabric underlay. It includes configurations for forwarding, routing, and policy options as well as interfaces participating in the fabric and BGP protocol configuration. In the sample Excel file included with the NITA package for EVPN data center mentioned above, the tabs that hold the variable information include "underlay_ebgp+", "core_interfaces+", "underlay_ebgp+"
