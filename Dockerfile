@@ -35,7 +35,7 @@ WORKDIR /tmp
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
+#RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
 COPY requirements.yml .
 RUN ansible-galaxy collection install -r requirements.yml
 
