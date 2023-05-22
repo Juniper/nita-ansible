@@ -1,12 +1,12 @@
-# NITA Ansible 22.8
+# NITA Ansible 23.Y
 
-Welcome to NITA 22.8.
+Welcome to NITA 23.y.
 
-Packages built from this branch will be nita-*-22.8-x where x is the packaging release.
+Packages built from this branch will be nita-*-22.Y-x where x is the packaging release.
 This branch also contains patches from other branches or minor modifications as required to support the stability and usability of the release.
 There are also some backwards compatibility packages here for ansible and robot that allow projects written for NITA 3.0.7 to work without having to make any changes.
 
-Note that NITA 22.8 is backward compatible with NITA 21.7 projects, provided the correct ansible and robot containers are installed.
+Note that NITA 23.Y should be backward compatible with NITA 22.8 and 21.7 projects, provided the correct ansible and robot containers are installed. However, see the note below about ansible 2.10 changes.
 
 # Copyright
 
@@ -29,7 +29,13 @@ No containers tagged as "latest" are provided by the package.
 
 ## Ansible 2.10 and greater
 
-Starting with Ansible 2.10, juniper.device and junipernetworks.junos ansible collections are added. This collection has been included in the requirements.yml file and will be built-in the container automatically. Existing juniper.junos role is still supported and works with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. As of juniper.device collection 1.0.2 it is still currently recommended to continue to use the juniper.junos roles versus juniper.device collection per the galaxy website. 
+Starting with Ansible 2.10, juniper.device and junipernetworks.junos ansible collections are added. This collection has been included in the requirements.yml file and will be built-in the container automatically. Existing juniper.junos role is still supported and works with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. Juniper.junos roles has been removed and superceded by the newer collections. If the old roles are still required, simply uncomment the line from the ``Dockerfile``:
+
+```
+RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
+```
+
+The network-roles the container copies over to support the NITA Project have been updated to remove the dependencies on the old roles and will use the collections.
 
 # Installing
 
