@@ -29,7 +29,7 @@ No containers tagged as "latest" are provided by the package.
 
 ## Ansible 2.10 and greater
 
-Starting with Ansible 2.10, juniper.device ansible collection is added. This collection has been included in the requirements.yml file and will be built-in the container automatically. Existing juniper.junos role is still supported and works with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. As of juniper.device collection 1.0.1 it is still currently recommended to continue to use the juniper.junos roles versus juniper.device collection per the galxy website. 
+Starting with Ansible 2.10, juniper.device and junipernetworks.junos ansible collections are added. This collection has been included in the requirements.yml file and will be built-in the container automatically. Existing juniper.junos role is still supported and works with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. As of juniper.device collection 1.0.2 it is still currently recommended to continue to use the juniper.junos roles versus juniper.device collection per the galaxy website. 
 
 # Installing
 
