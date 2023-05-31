@@ -12,7 +12,7 @@
 # Third-Party Code: This code may depend on other components under separate copyright notice and license terms. Your use of the source code for those components is subject to the terms and conditions of the respective license as noted in the Third-Party source code file.
 #
 # ********************************************************
-cd nita-awx
+cd awx
 git clone https://github.com/ansible/awx-operator.git
 export NAMESPACE=awx
 kubectl create ns $NAMESPACE
