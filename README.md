@@ -1,12 +1,12 @@
-# NITA Ansible 23.Y
+# NITA Ansible 23.p
 
-Welcome to NITA 23.y.
+Welcome to NITA 23.p pre-release.
 
-Packages built from this branch will be nita-*-22.Y-x where x is the packaging release.
+Packages built from this branch will be nita-*-22.p-x where x is the packaging release.
 This branch also contains patches from other branches or minor modifications as required to support the stability and usability of the release.
 There are also some backwards compatibility packages here for ansible and robot that allow projects written for NITA 3.0.7 to work without having to make any changes.
 
-Note that NITA 23.Y should be backward compatible with NITA 22.8 and 21.7 projects, provided the correct ansible and robot containers are installed. However, see the note below about ansible 2.10 changes.
+Note that NITA 23.p should be backward compatible with NITA 22.8 and 21.7 projects, provided the correct ansible and robot containers are installed. However, see the note below about ansible 2.10 changes.
 
 # Copyright
 
