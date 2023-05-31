@@ -1,0 +1,4 @@
+---
+collections:
+    - juniper.device
+    - junipernetworks.junos

@@ -1,0 +1,3 @@
+---
+- name: Configure evpn vxlan ports
+  template: src="evpn_port.j2" dest="{{ tmp_dir }}/evpn_port.cfg"

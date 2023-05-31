@@ -1,0 +1,16 @@
+---
+- name: Creating base interfaces config
+  template: src="interfaces.j2" dest="{{ tmp_dir }}/interfaces.cfg"
+
+- name: Creating protocols config
+  template: src="protocols.j2" dest="{{ tmp_dir }}/protocols.cfg"
+
+- name: Creating policy-options config
+  template: src="policy-options.j2" dest="{{ tmp_dir }}/policy-options.cfg"
+
+- name: Creating forwarding-options config
+  template: src="forwarding-options.j2" dest="{{ tmp_dir }}/forwarding-options.cfg"
+
+- name: Creating routing-options config
+  template: src="routing-options.j2" dest="{{ tmp_dir }}/routing-options.cfg"
+
