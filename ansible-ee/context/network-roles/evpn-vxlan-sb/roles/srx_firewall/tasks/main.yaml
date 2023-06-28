@@ -1,0 +1,16 @@
+---
+- name: Creating firewall port config
+  template: src=firewall_port.j2 dest={{ tmp_dir }}/firewall_port.cfg
+
+- name: Creating ospf config
+  template: src=ospf.j2 dest={{ tmp_dir }}/ospf.cfg
+
+- name: Creating fabric routing instance config
+  template: src=fabric.j2 dest={{ tmp_dir }}/fabric.cfg
+
+- name: Creating zones config
+  template: src=zones.j2 dest={{ tmp_dir }}/zones.cfg
+
+- name: Creating security policies config
+  template: src=security_policies.j2 dest={{ tmp_dir }}/security_policies.cfg
+

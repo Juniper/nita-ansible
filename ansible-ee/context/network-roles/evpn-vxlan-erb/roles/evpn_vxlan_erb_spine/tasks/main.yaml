@@ -1,0 +1,3 @@
+---
+- name: Create iBGP route reflector
+  template: src="ibgp_spine_rr.j2" dest="{{ tmp_dir }}/ibgp_spine_rr.cfg"

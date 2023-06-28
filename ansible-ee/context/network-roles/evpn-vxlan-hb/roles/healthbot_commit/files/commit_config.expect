@@ -1,0 +1,18 @@
+#!/usr/bin/expect
+
+spawn docker-compose -p healthbot -f /var/local/healthbot/healthbot_mgd.yaml exec mgd /usr/sbin/cli
+expect "> "
+send "request healthbot load | no-more\n"
+expect "> "
+send "configure\n"
+expect "# "
+send "load merge /config/healthbot.conf | no-more\n"
+expect "# "
+send "commit and-quit\n"
+expect "> "
+send "request healthbot deploy\n"
+expect "Do you want to continue (y/n) ? "
+send "y\n"
+expect "Do you want to continue (y/n) ? "
+send "y\n"
+expect "> "

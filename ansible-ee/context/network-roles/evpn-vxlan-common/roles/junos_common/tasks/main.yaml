@@ -1,0 +1,15 @@
+---
+- name: Creating management interface
+  template: src=management_interface.j2 dest={{ tmp_dir }}/management_interface.cfg
+
+- name: Creating common SNMP config
+  template: src=snmp.j2 dest={{ tmp_dir }}/snmp.cfg
+
+- name: Creating common routing config
+  template: src=routing_options.j2 dest={{ tmp_dir }}/routing_options.cfg
+
+- name: Creating chassis config
+  template: src=chassis.j2 dest={{ tmp_dir }}/chassis.cfg
+
+- name: Enable grpc support
+  template: src=common_system.j2 dest={{ tmp_dir }}/common_system.cfg
