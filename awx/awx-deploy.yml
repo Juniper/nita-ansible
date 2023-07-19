@@ -1,0 +1,16 @@
+---
+apiVersion: awx.ansible.com/v1beta1
+kind: AWX
+metadata:
+  name: awx
+spec:
+  service_type: nodeport
+  projects_persistence: true
+  projects_storage_access_mode: ReadWriteOnce
+  web_extra_volume_mounts: |
+    - name: static-data
+      mountPath: /var/lib/projects
+  extra_volumes: |
+    - name: static-data
+      persistentVolumeClaim:
+        claimName: static-data-pvc

@@ -1,0 +1,3 @@
+---
+- name: Configure VRFs
+  template: src="evpn_vrf.j2" dest="{{ tmp_dir }}/evpn_vrf.cfg"

@@ -1,0 +1,24 @@
+---
+- name: installing expect
+  become: yes
+  apt:
+      name: expect
+
+- name: install healthbot commit_config.expect script
+  become: yes
+  copy:
+      src: commit_config.expect
+      dest: /root/commit_config.expect
+      mode: 0755
+
+- name: copy configuration file
+  become: yes
+  copy:
+      src: "{{ build_dir }}/healthbot.conf"
+      dest: /var/local/healthbot/mgd_config/healthbot.conf
+      mode: 0644
+
+- name: execute expect script to commit configuration to healthbot
+  become: yes
+  shell: "/root/commit_config.expect"
+
