@@ -17,8 +17,7 @@
 
 if [ -x "$(command -v kubectl)" ]; then
 
-    export POD=$(kubectl get pods --no-headers=true -l io.kompose.service=ansible | grep Running | awk '{print $1}')
-    CMD="kubectl exec -it $POD -- bash"
+    CMD="kubectl run -i --tty --rm nita-ansible --image=juniper/nita-ansible:22.8-1 --restart=Never -- bash"
 
 elif [ -x "$(command -v docker)" ]; then
 
