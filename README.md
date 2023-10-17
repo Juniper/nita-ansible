@@ -1,16 +1,16 @@
-# NITA Ansible 22.8
+# NITA Ansible 23.p
 
-Welcome to NITA 22.8.
+Welcome to NITA 23.p pre-release. This is a testing release that includes scripts for building ansible execution environment for use with AWX. The execution environment is based on the nita-ansible docker build. Also included is a script to install AWX. See the individual readme files under the ansible-ee and awx folders for more information.
 
-Packages built from this branch will be nita-*-22.8-x where x is the packaging release.
+Packages built from this branch will be nita-*-22.p-x where x is the packaging release.
 This branch also contains patches from other branches or minor modifications as required to support the stability and usability of the release.
 There are also some backwards compatibility packages here for ansible and robot that allow projects written for NITA 3.0.7 to work without having to make any changes.
 
-Note that NITA 22.8 is backward compatible with NITA 21.7 projects, provided the correct ansible and robot containers are installed.
+Note that NITA 23.p should be backward compatible with NITA 22.8 and 21.7 projects, provided the correct ansible and robot containers are installed. However, see the note below about ansible 2.10 changes.
 
 # Copyright
 
-Copyright 2021, Juniper Networks, Inc.
+Copyright 2023, Juniper Networks, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -29,7 +29,13 @@ No containers tagged as "latest" are provided by the package.
 
 ## Ansible 2.10 and greater
 
-Starting with Ansible 2.10, juniper.device ansible collection is added. This collection has been included in the requirements.yml file and will be built-in the container automatically. Existing juniper.junos role is still supported and works with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. As of juniper.device collection 1.0.1 it is still currently recommended to continue to use the juniper.junos roles versus juniper.device collection per the galxy website. 
+Starting with Ansible 2.10, juniper.device and junipernetworks.junos ansible collections are added. This collection has been included in the requirements.yml file and will be built-in the container automatically. Existing juniper.junos role is still supported and works with Ansible 2.10. For more information on this transition see https://www.juniper.net/documentation/us/en/software/junos-ansible/ansible/topics/concept/junos-ansible-modules-overview.html and https://galaxy.ansible.com/juniper/device. Juniper.junos roles has been removed and superceded by the newer collections. If the old roles are still required, simply uncomment the line from the ``Dockerfile``:
+
+```
+RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
+```
+
+The network-roles the container copies over to support the NITA Project have been updated to remove the dependencies on the old roles and will use the collections.
 
 # Installing
 
@@ -89,11 +95,6 @@ When invoking these built-in roles the build-folder needs to be passed to the an
 ```
 ansible-playbook -i hosts playbook.yaml --extra-vars "build_dir=container_build_folder"
 ```
-
-### Juniper.junos
-
-This is the main Junos Ansible 2.9 role and is included in the nita-ansible container. This role allows Ansible to communicate with Junos devices. Information on the functionality that is provided with this Ansible role can found here: https://www.juniper.net/documentation/en_US/junos-ansible/topics/reference/general/junos-ansible-modules-overview.html
-
 ### ebgp_ip_fabric
 
 Builds the configuration stanzas that make up a Junos eBGP IP fabric underlay. It includes configurations for forwarding, routing, and policy options as well as interfaces participating in the fabric and BGP protocol configuration. In the sample Excel file included with the NITA package for EVPN data center mentioned above, the tabs that hold the variable information include "underlay_ebgp+", "core_interfaces+", "underlay_ebgp+"

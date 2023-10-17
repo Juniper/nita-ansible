@@ -12,7 +12,7 @@
 #
 # ********************************************************
 
-FROM amd64/alpine:3.16.1
+FROM amd64/alpine:3.17.3
 
 # ==> Specify Python requirements filename;   default = "requirements.txt"
 # ==> Specify Ansible requirements filename;  default = "requirements.yml"
@@ -27,15 +27,15 @@ RUN apk add --no-cache sudo \
     gcc libxml2-dev libxslt-dev musl-dev \
     bash python3-dev openssh expect sshpass \
     libffi-dev openssl-dev build-base curl vim \
-    ansible-core=2.13.0-r0 \
-    ansible=5.8.0-r0
+    ansible-core \
+    ansible
 
 # copy requirements.txt for Python and install
 WORKDIR /tmp
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
+#RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
 COPY requirements.yml .
 RUN ansible-galaxy collection install -r requirements.yml
 
