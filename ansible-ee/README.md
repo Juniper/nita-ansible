@@ -1,11 +1,6 @@
 <H1> AWX Execution Environment </H1>
 
-Files located in this directory are used to create ansible execution environment for AWX/Ansible Tower. the ```build-container.sh``` script calls ansible-builder, which needs to be installed using pip (see https://ansible-builder.readthedocs.io/en/stable/installation/). Ansible-builder requires python3.8 or later to execute. [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and [Docker](https://docs.docker.com/engine/install/ubuntu/) also need to be installed.  You can also build the container directly by issuing the following commands:
-
-```
-cd context
-docker build  --tag "juniper/nita-ansible-ee:22.9" .
-```
+Files located in this directory are used to create ansible execution environment for AWX/Ansible Tower. the ```build-ee-container.sh``` script calls ansible-builder, which needs to be installed using pip (see https://ansible-builder.readthedocs.io/en/stable/installation/). Ansible-builder requires python3.8 or later to execute. [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) and [Docker](https://docs.docker.com/engine/install/ubuntu/) also need to be installed. 
 
 AWX requires ansible EEs to be pulled from a repository. For testing purposes you can setup a local repository. See the instructions at https://www.docker.com/blog/how-to-use-your-own-registry-2/. After building the container, you can add a local repository as follows:
 
@@ -24,14 +19,9 @@ After this simply define the localhost:5000/ansible-ee in your definition for an
 + The file ``bindep.txt`` and related configuration in ``nita-ansible-ee.yml`` are here for completeness. AWX documentation and some blogs indicated it is required although container seemed to build and operate fine without it.
 + This container is being tested against a version of the ebgp-wan example from the NITA project. Current files for the AWX test version can be found at  https://github.com/wildsubnet/awx-test. There are certain incompatiabilities between NITA environment and AWX need to be worked out (see todo list below)
 
-## To-Do
-
-See https://github.com/users/wildsubnet/projects/1 for current list. Issues can be found at https://github.com/wildsubnet/nita-awx/issues
-
-
 ## AWX Screenshots
 
-How the NITA example data is being loaded into AWX for testing (as of September 22, 2022).
+How the NITA example data is being loaded into AWX for testing.
 
 ### Template
 <img width="1255" alt="image" src="https://user-images.githubusercontent.com/6110061/236244860-1bf9d65b-f034-4d35-88c4-b904def590c1.png">
