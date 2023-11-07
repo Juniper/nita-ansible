@@ -13,4 +13,4 @@
 #
 # ********************************************************
 
-docker build -t juniper/nita-ansible:22.8-1 .
+docker build -t juniper/nita-ansible:22.8-2 .

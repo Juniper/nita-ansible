@@ -1,12 +1,11 @@
-# NITA Ansible 23.p
+# NITA Ansible 22.8-2
 
-Welcome to NITA 23.p pre-release. This is a testing release that includes scripts for building ansible execution environment for use with AWX. The execution environment is based on the nita-ansible docker build. Also included is a script to install AWX. See the individual readme files under the ansible-ee and awx folders for more information.
+Welcome to NITA 22.8-2. This is an update release that includes scripts for building ansible execution environment for use with AWX. The execution environment is based on the nita-ansible docker build. Also included is a script to install AWX. See the individual readme files under the ansible-ee and awx folders for more information.
 
-Packages built from this branch will be nita-*-22.p-x where x is the packaging release.
 This branch also contains patches from other branches or minor modifications as required to support the stability and usability of the release.
 There are also some backwards compatibility packages here for ansible and robot that allow projects written for NITA 3.0.7 to work without having to make any changes.
 
-Note that NITA 23.p should be backward compatible with NITA 22.8 and 21.7 projects, provided the correct ansible and robot containers are installed. However, see the note below about ansible 2.10 changes.
+Note that NITA 22.8-2 should be backward compatible with NITA 22.8 and 21.7 projects, provided the correct ansible and robot containers are installed. However, see the note below about ansible 2.10 changes.
 
 # Copyright
 
