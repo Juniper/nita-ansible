@@ -1,6 +1,6 @@
 # nita-awx
 
-This is a work in progress and represents the files used to create an AWX instance running along side an existing NITA (docker based) install. This is being used to test the AWX execution environment. AWX requires kubernetes.
+This is being used to test the AWX execution environment. AWX requires kubernetes.
 
 ## Folders
 
@@ -20,6 +20,8 @@ You can test the installation of k3s with the following commands:
 kubectl get nodes
 kubectl version --short
 ```
+
+Note: k8s is less forgiving of implied storage requirements and may require additional storage setup for AWX to start properly.
 
 2. Install AWX using the provided script as show below. This does a few things in addition to pulling a specific version of AWX. The script creates a namespace in k8s called ```awx```. It also creates the pods required to run AWX and spins up a service running on default ports for AWX. 
 
@@ -54,5 +56,8 @@ kubectl delete serviceaccount awx-operator-controller-manager
 kubectl delete rolebinding awx-operator-awx-manager-rolebinding
 kubectl delete role awx-operator-awx-manager-role
 ```
- 
+
+ ## To-do
+
+Need to update installer for k8s rather than k3s and still need integration between nita webapp and AWX.
 
