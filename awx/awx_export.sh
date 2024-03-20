@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# awx_export <password> <filename>
+#
+
+TOWER_HOST=http://127.0.0.1:30080
+TOWER_USERNAME=awx
+TOWER_PASSWORD=$1
+json=$(awx -k --conf.host $TOWER_HOST  --conf.username $TOWER_USERNAME --conf.password $TOWER_PASSWORD login)
+#token=$(echo "$json" | sed 's/{.*"token":"\([^"]*\)".*}/\1/g')
+token=$(echo "$json" | jq ".token"|tr -d '"')
+echo $token
+awx export -k --conf.token $token > $2
