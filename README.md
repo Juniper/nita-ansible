@@ -1,4 +1,4 @@
-# NITA Ansible 22.8-2
+# NITA Ansible 23.12
 
 Welcome to NITA 22.8-2. This is an update release that includes scripts for building ansible execution environment for use with AWX. The execution environment is based on the nita-ansible docker build. Also included is a script to install AWX. See the individual readme files under the ansible-ee and awx folders for more information.
 
@@ -9,7 +9,7 @@ Note that NITA 22.8-2 should be backward compatible with NITA 22.8 and 21.7 proj
 
 # Copyright
 
-Copyright 2023, Juniper Networks, Inc.
+Copyright 2024, Juniper Networks, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -79,7 +79,7 @@ docker run -u root -v /project_folder:/container_folder:rw  --rm  -it --name ans
 
 You can execute the playbook into a bash shell and troubleshoot from the project folder mounted inside the container if your playbooks are not operating correctly by issuing the ```docker run``` command above with just the bash shell (remove everything after ```/bin/bash```).
 
-# Roles
+# Ansible Roles
 
 ## Built-in roles
 
@@ -254,9 +254,9 @@ This role contains junos configuration statements for the MX router in the WAN r
 
 # Examples
 
-More complex examples of project folders can be found in the larger NITA project itself, particularly at https://github.com/Juniper/nita-webapp/tree/main/examples
+More complex examples of project folders can be found in the larger NITA project itself, particularly at https://github.com/Juniper/nita/tree/main/examples.
 
 
 # Misc
 
-For more information on NITA releases refer to the [README.md](https://github.com/Juniper/nita-webapp/blob/22.8/README.md) for the NITA Webapp.
+For more information on NITA releases, please refer to the NITA [README.md](https://github.com/Juniper/nita/tree/main/README.md) file.
