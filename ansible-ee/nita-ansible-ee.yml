@@ -1,17 +1,34 @@
 ---
-version: 1
+version: 3
 build_arg_defaults:
-  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-vvv"
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "--pre -vvv"
 dependencies:
+  ansible_core:
+    package_pip: ansible-core==2.14.4
+  ansible_runner:
+    package_pip: ansible-runner
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
 
+images:
+  base_image:
+    name: quay.io/rockylinux/rockylinux:9 
+    # Other available base images:
+    #   - quay.io/rockylinux/rockylinux:9
+    #   - quay.io/centos/centos:stream9
+    #   - registry.fedoraproject.org/fedora:38
+    #   - registry.redhat.io/ansible-automation-platform-23/ee-minimal-rhel8:latest
+
+additional_build_files:
+    - src: ansible.cfg
+      dest: configs
+
 additional_build_steps:
-  prepend: |
+  prepend_base: |
     RUN whoami
     RUN cat /etc/os-release
-  append:  
+  append_final:  
     - COPY network-roles network-roles
     - RUN cd network-roles/ebgp-ip-fabric && bash install.sh
     - RUN cd network-roles/evpn-vxlan-common && bash install.sh

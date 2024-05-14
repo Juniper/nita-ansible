@@ -1,0 +1,16 @@
+---
+- name: Configure healthbot device
+  template: src="device.j2" dest="{{ tmp_dir }}/device.cfg"
+
+- name: Configure healthbot device group
+  template: src="device_group.j2" dest="{{ tmp_dir }}/device_group.cfg"
+
+- name: Assembling configurations per device
+  assemble:
+    src={{ build_dir }}/{{ inventory_hostname }}/tmp
+    dest={{ build_dir }}/{{ inventory_hostname }}/healthbot.conf
+    mode={{ conf_file_mode | default('666') }}
+    regexp=.+\.cfg
+
+- name: Append to common configuration
+  shell: "cat {{ build_dir }}/{{ inventory_hostname }}/healthbot.conf >> {{ build_dir }}/healthbot.conf"

@@ -1,0 +1,3 @@
+---
+- name: Configure BGP + EVPN for ERB leaf
+  template: src="ibgp_leaf.j2" dest="{{ tmp_dir }}/ibgp_leaf.cfg"

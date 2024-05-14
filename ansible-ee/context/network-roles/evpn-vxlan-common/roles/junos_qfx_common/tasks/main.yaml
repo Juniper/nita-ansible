@@ -1,0 +1,7 @@
+---
+- name: Creating vqfx pfe interface
+  template: src=vqfx_pfe_interface.j2 dest={{ tmp_dir }}/vqfx_pfe_interface.cfg
+
+- name: Creating common system config
+  template: src=system.j2 dest={{ tmp_dir }}/system.cfg
+

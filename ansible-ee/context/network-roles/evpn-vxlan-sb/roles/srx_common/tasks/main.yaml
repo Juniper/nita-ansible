@@ -1,0 +1,10 @@
+---
+- name: Creating common system config
+  template: src=system.j2 dest={{ tmp_dir }}/system.cfg
+
+- name: Creating security config
+  template: src=security.j2 dest={{ tmp_dir }}/security.cfg
+
+- name: Creating lldp config
+  template: src=lldp.j2 dest={{ tmp_dir }}/lldp.cfg
+
