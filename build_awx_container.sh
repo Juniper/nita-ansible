@@ -19,6 +19,8 @@ kubectl create ns $NAMESPACE
 cd awx-operator
 git checkout 2.18.0
 make deploy
+# Postgres data directory
+sudo mkdir -p /var/lib/pgsql/data
 cp ../pv-postgres-15.yml .
 cp ../pv-projects.yml .
 kubectl -n $NAMESPACE apply -f pv-postgres-15.yml
