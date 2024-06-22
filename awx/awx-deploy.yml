@@ -5,12 +5,13 @@ metadata:
   name: awx
 spec:
   service_type: nodeport
-  projects_persistence: true
-  projects_storage_access_mode: ReadWriteOnce
-  web_extra_volume_mounts: |
-    - name: static-data
-      mountPath: /var/lib/projects
-  extra_volumes: |
-    - name: static-data
-      persistentVolumeClaim:
-        claimName: static-data-pvc
+  nodeport_port: 31768
+  web_replicas: 1
+  task_replicas: 2
+  projects_storage_size: 1Gi
+  projects_existing_claim: awx-projects-claim
+  postgres_data_volume_init: true
+  postgres_storage_class: awx-postgres-volume
+  postgres_init_container_commands: |
+    chown 26:0 /var/lib/pgsql/data
+    chmod 700 /var/lib/pgsql/data
