@@ -6,30 +6,31 @@ AWX requires ansible EEs to be pulled from a repository. For testing purposes yo
 
 ```
 docker run -d -p 5000:5000 --restart always --name registry registry
-docker tag <Ansible-ee-container-image-id> "localhost:5000/ansible-ee"
-docker push localhost:5000/ansible-ee
+docker tag <Ansible-ee-container-image-id> "localhost:5000/nita-ansible-ee"
+docker push localhost:5000/nita-ansible-ee
 ```
 
 After this simply define the localhost:5000/ansible-ee in your definition for an Execution Environment in AWX:
 
-![image](https://user-images.githubusercontent.com/6110061/187557638-8b0e00bf-9cfc-4f53-9ef3-c97e7fdf0ad0.png)
+<img width="1510" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/4e61b9ba-f107-4b6e-9dd9-965264178554">
+
 
 <H2> Notes </H2>
 
-+ The file ``bindep.txt`` and related configuration in ``nita-ansible-ee.yml`` are here for completeness. AWX documentation and some blogs indicated it is required although container seemed to build and operate fine without it.
-+ This container is being tested against a version of the ebgp-wan example from the NITA project. Current files for the AWX test version can be found at  https://github.com/wildsubnet/awx-test. There are certain incompatiabilities between NITA environment and AWX need to be worked out (see todo list below)
++ This container is being tested against a version of the ebgp-wan example from the NITA project. Current files for the AWX test version can be found at https://github.com/wildsubnet/awx-test. The AWX installation included here creates a folder called /data/project that will be mounted in the AWX Task container under /var/lib/awx/projects. For the NITA WAN demo you can ``git clone https://github.com/wildsubnet/awx-test`` awx-test under your actual project folder. 
 
 ## AWX Screenshots
 
 How the NITA example data is being loaded into AWX for testing.
 
 ### Template
-<img width="1255" alt="image" src="https://user-images.githubusercontent.com/6110061/236244860-1bf9d65b-f034-4d35-88c4-b904def590c1.png">
+<img width="1526" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/5820f15e-a9ff-44c9-b48b-d209b5ca6923">
 
 
 ### Project
 
-![image](https://user-images.githubusercontent.com/6110061/191846831-1f8644e1-96e2-496d-b77e-5a127d46ea61.png)
+<img width="1505" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/de5572ab-6707-415a-94e0-f9d8765dee99">
+
 
 ### Inventories
 
@@ -43,36 +44,3 @@ Each individual host has ``host_vars`` defined here
 
 <img width="1277" alt="image" src="https://user-images.githubusercontent.com/6110061/235500135-b8bf91ca-a3f5-49a4-a625-a5820bba60e4.png">
 <img width="1277" alt="image" src="https://user-images.githubusercontent.com/6110061/191847262-1cefe0fa-5960-4513-8c06-a37247fa4aa3.png">
-
-### Instance Groups
-
-In order to mount /var/tmp into ansible execution environment, you need to update the yaml file for the container group that creates the AWX worker.  
-<img width="1274" alt="image" src="https://user-images.githubusercontent.com/6110061/235755603-e99723e2-d46a-4533-bd7e-c392d94c8f17.png">
-
-Example file:
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  namespace: awx
-spec:
-  serviceAccountName: default
-  automountServiceAccountToken: false
-  containers:
-    - image: quay.io/ansible/awx-ee:latest
-      name: worker
-      args:
-        - ansible-runner
-        - worker
-        - '--private-data-dir=/runner'
-      volumeMounts:
-        - mountPath: /var/tmp
-          name: nb-volume
-          readOnly: false
-  volumes:
-    - hostPath:
-        path: /var/tmp
-        type: ""
-      name: nb-volume
-```
-
