@@ -30,7 +30,7 @@ kubectl -n awx get secret  awx-admin-password -o jsonpath="{.data.password}" | b
 
 5. Setup execution environment for NITA.
 
-See [ansible-ee/README.md](ansible-ee/README.md) for details.
+See [ansible-ee/README.md](/ansible-ee/README.md)  for details.
 
 ## Coming Soon
 
