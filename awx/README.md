@@ -35,3 +35,43 @@ See [ansible-ee/README.md](/ansible-ee/README.md)  for details.
 ## Coming Soon
 
 NITA has been ported to k8s so we can being integration work with AWX.  
+
+
+## AWX Screenshots
+
+How the NITA example data is being loaded into AWX for testing.
+
+### Template
+<img width="1526" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/5820f15e-a9ff-44c9-b48b-d209b5ca6923">
+
+
+### Project
+
+<img width="1505" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/de5572ab-6707-415a-94e0-f9d8765dee99">
+
+### Template
+
+<img width="1950" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/262a6242-8128-491d-86e2-70d82391b49e">
+
+
+### Inventories
+
+Note the variable data from ``groups_vars``. Also AWX requires an additional variable definition here ``ansible_python_interpreter: "{{ ansible_playbook_python }}"`` otherwise it will toss a missing module error because it runs the wrong python environment. See [this](https://www.reddit.com/r/ansible/comments/rb80pv/execution_environments_and_pip_module_locations/) thread. 
+
+<img width="1269" alt="image" src="https://github.com/wildsubnet/nita-awx/assets/6110061/958f3a4e-c262-4c8d-b92a-b1d56ea40204">
+
+Hosts also need to be put in a logically equivalent group based on the ansible playbook. So for the NITA example, create a group called ``routers``
+
+<img width="1963" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/405ba267-aa2d-42e7-9900-cb0824bfb963">
+
+### Hosts
+
+Under hosts create individual hosts (note the variable information per host). Also under the groups tab you will add the host to the ``routers`` group. Currently demo doesn't have name resolution working so the name field has specific IPs. If name resolution is setup the resolvable name can be used.
+
+<img width="1945" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/c0a38988-67b6-43fc-a112-b892d4f385cc">
+
+
+<img width="1948" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/c8f18ec4-abdd-4bae-b47b-2f3283b515b0">
+
+
+
