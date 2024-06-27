@@ -66,10 +66,11 @@ Hosts also need to be put in a logically equivalent group based on the ansible p
 
 ### Hosts
 
-Under hosts create individual hosts (note the variable information per host). Also under the groups tab you will add the host to the ``routers`` group. Currently demo doesn't have name resolution working so the name field has specific IPs. If name resolution is setup the resolvable name can be used.
+Under hosts create individual hosts (note the variable information per host).  Currently demo doesn't have name resolution working so the name field has specific IPs. If name resolution is setup the resolvable name can be used.
 
 <img width="1945" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/c0a38988-67b6-43fc-a112-b892d4f385cc">
 
+Details page. Under the groups tab you will add the host to the relevant playbook group.
 
 <img width="1948" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/c8f18ec4-abdd-4bae-b47b-2f3283b515b0">
 
