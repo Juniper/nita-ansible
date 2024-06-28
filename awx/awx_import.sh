@@ -3,7 +3,7 @@
 # awx_import <password> <filename>
 #
 
-TOWER_HOST=http://127.0.0.1:30514
+TOWER_HOST=http://127.0.0.1:31768
 TOWER_USERNAME=admin
 TOWER_PASSWORD=$1
 json=$(awx -k --conf.host $TOWER_HOST  --conf.username $TOWER_USERNAME --conf.password $TOWER_PASSWORD login)
