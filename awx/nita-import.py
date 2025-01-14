@@ -49,7 +49,7 @@ USER="awx"
 PASSWORD="Juniper!1"
 credentials=f"{USER}:{PASSWORD}"
 encodeded_credentials=base64.b64encode(credentials.encode()).decode()
-URL="http://127.0.0.1:31768/api/"
+URL="http://127.0.0.1:31768"
 FMT="?format=json"
 HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
 #
@@ -57,8 +57,8 @@ HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
 # HEADER={"Content-Type": "application/json", "Accept": "application/json", "Authorization": f"Basic {encodeded_credentials}"}
 # print(HEADER)
 #
-login=requests.get(URL+"login",auth=(USER,PASSWORD))
-response=requests.get(URL+"v2/inventories/2/"+FMT,auth=(USER,PASSWORD))
+login=requests.get(URL+"/api/login",auth=(USER,PASSWORD))
+response=requests.get(URL+"/api/v2/inventories/2/"+FMT,auth=(USER,PASSWORD))
 if response.status_code != 200:
     print("Server unavailable")
     sys.exit()
@@ -67,8 +67,9 @@ else:
 #
 # Pull existing inventory
 #
-inventories=requests.get(URL+"v2/inventories"+FMT,auth=(USER,PASSWORD),headers=HEADER)
+inventories=requests.get(URL+"/api/v2/inventories"+FMT,auth=(USER,PASSWORD),headers=HEADER)
 dictInventory=json.loads(inventories.text)
+print(dictInventory)
 for count,dict in enumerate(dictInventory['results']):
     id = dict['id']
     name = dict['name']
@@ -85,23 +86,44 @@ for count,dict in enumerate(dictInventory['results']):
         #
         # Update description on server
         #
-        inventories=requests.patch(URL+"v2/inventories/"+str(id),data='{"description":"NITA Test Inventory Again"}',auth=(USER,PASSWORD),headers=HEADER)
+        inventories=requests.patch(URL+"/api/v2/inventories/"+str(id),data='{"description":"NITA Test Inventory Again"}',auth=(USER,PASSWORD),headers=HEADER)
         print(inventories.status_code)
+        #
+        # Grab the "routers" group ID
+        #
+        group_url = dict['related']['groups']
+        print(URL+group_url)
+        groups=requests.get(URL+group_url,auth=(USER,PASSWORD),headers=HEADER)
+        groupsList = json.loads(groups.text)
+        print(groups.status_code)
+        if groups.status_code == 200:
+            for groups_dict in groupsList['results']:
+                if groups_dict['name'] == "routers":
+                    group_id=groups_dict['id']
+                    print(f"Group ID: {group_id}")
+
 #
 #Add pe3 host to existing inventory
 #
-post_URL=URL+"v2/inventories/"+str(id)+"/hosts/"
+post_URL=URL+"/api/v2/inventories/"+str(id)+"/hosts/"
 print(post_URL)
 response=requests.post(post_URL,headers=HEADER,auth=(USER,PASSWORD),data=pe3_data_json)
 print(response.status_code)
 print(response.reason)
 if response.status_code==201:
     host_id=json.loads(response.text)['id']
+    #
+    # Patch variable data to pe3 host
+    #
+    response=requests.patch(URL+"/api/v2/hosts/"+str(host_id)+"/variable_data/",headers=HEADER,auth=(USER,PASSWORD),data=pe3_var_json)
+    print(response.status_code)
+    print(response.reason)
+    #
+    # Add pe3 host to routers group
+    #
+    response=requests.post(URL+"/api/v2/hosts/"+str(host_id)+"/groups/",headers=HEADER,auth=(USER,PASSWORD),data='{"id":'+str(group_id)+'}')
+    print(response.status_code)
+    print(response.reason)
 else:
     print(response.text)
-#
-# Patch variable data to pe3 host
-#
-response=requests.patch(URL+"v2/hosts/"+str(host_id)+"/variable_data/",headers=HEADER,auth=(USER,PASSWORD),data=pe3_var_json)
-print(response.status_code)
-print(response.reason)
+
