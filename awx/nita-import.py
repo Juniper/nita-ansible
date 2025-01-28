@@ -5,6 +5,10 @@ import sys
 import json,yaml
 import base64
 
+#
+# Postman seemed to indicated the basic authentication login action is still required so stuck with basic authentication for now
+# HEADER={"Content-Type": "application/json", "Accept": "application/json", "Authorization": f"Basic {encodeded_credentials}"}
+#
 USER="awx"
 PASSWORD="Juniper!1"
 credentials=f"{USER}:{PASSWORD}"
@@ -59,99 +63,133 @@ def getAWX (subURL):
     if FMT in subURL:
        FMT=""
     HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
-    response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
-    if response.status_code != 200:
-      print(f"Server unavailable: {response.status_code} {response.text}")
+    try:
+      response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+      if response.status_code != 200:
+        print(f"Server unavailable: {response.status_code} {response.text}")
+        sys.exit()
+      print ("get: "+AWX+subURL+FMT)
+      return requests.get(AWX+subURL+FMT,auth=(USER,PASSWORD),headers=HEADER)
+    except requests.exceptions.RequestException as e:
+      print(f"Server unavailable: {e}")
       sys.exit()
-    print ("get: "+AWX+subURL+FMT)
-    return requests.get(AWX+subURL+FMT,auth=(USER,PASSWORD),headers=HEADER)
+    #response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+    #if response.status_code != 200:
+    #  print(f"Server unavailable: {response.status_code} {response.text}")
+    #  sys.exit()
+    #print ("get: "+AWX+subURL+FMT)
+    #return requests.get(AWX+subURL+FMT,auth=(USER,PASSWORD),headers=HEADER)
 
 def patchAWX (subURL, dataDict):
     FMT="?format=json"
     if FMT in subURL:
        FMT=""
     HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
-    response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
-    if response.status_code != 200:
-      print(f"Server unavailable: {response.status_code} {response.text}")
+    try:
+      response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+      #if response.status_code != 200:
+      #  print(f"Server unavailable: {response.status_code} {response.text}")
+      #  sys.exit()
+      #print ("patch: "+AWX+subURL)
+      return requests.patch(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
+    except requests.exceptions.HTTPError as http_err:
+      if response.status_code == 400:
+        print("400 Bad Request: {http_err}")
+    except requests.exceptions.RequestException as e:
+      print(f"Server unavailable: {e}")
       sys.exit()
-    print ("patch: "+AWX+subURL)
-    return requests.patch(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
+    #response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+    #if response.status_code != 200:
+    #  print(f"Server unavailable: {response.status_code} {response.text}")
+    #  sys.exit()
+    #print ("patch: "+AWX+subURL)
+    #return requests.patch(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
     
 def postAWX (subURL, dataDict):
     FMT="?format=json"
     if FMT in subURL:
        FMT=""
     HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
-    response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
-    if response.status_code != 200:
-      print(f"Server unavailable: {response.status_code} {response.text}")
-      sys.exit()
-    print ("post: "+AWX+subURL)
-    return requests.post(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
-    
-#
-# Postman seemed to indicated the basic authentication login action is still required so stuck with basic authentication for now
-# HEADER={"Content-Type": "application/json", "Accept": "application/json", "Authorization": f"Basic {encodeded_credentials}"}
-#
+    try:
+      response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+      #if response.status_code != 200:
+      #  print(f"Server unavailable: {response.status_code} {response.text}")
+      #  sys.exit()
+      print ("post: "+AWX+subURL)
+      response=requests.post(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
+      response.raise_for_status()
+      
+      return response
+    except requests.exceptions.HTTPError as err:
+      if response.status_code == 400:
+        print(f"400 Bad Request: {err}")
+        return "400 Bad Request"
+    except requests.exceptions.ConnectionError as conn_err:
+        print(f"Connection error occurred: {conn_err}")
+    except requests.exceptions.Timeout as timeout_err:
+        print(f"Timeout error occurred: {timeout_err}")
+    except requests.exceptions.RequestException as req_err:
+        print(f"An error occurred: {req_err}")
+
+def addHost (inventory_id, host_data, var_data):
+  #Simple function to add a host to AWX inventory 
+  host_id = 0
+  response=postAWX("/api/v2/inventories/"+str(inventory_id)+"/hosts/",host_data)
+  if response != "400 Bad Request":
+     if response.status_code == 201:
+      host_id=json.loads(response.text)['id']
+      response=patchAWX("/api/v2/hosts/"+str(host_id)+"/variable_data/",pe3_var_json)
+  return response, host_id
+
+def getInventory (inventory_name):
+  inventories=getAWX("/api/v2/inventories")
+  dictInventory=json.loads(inventories.text)
+  for dict in dictInventory['results']:
+    if dict['name'] == inventory_name:
+      return dict['id'],dict['description'],dict['organization'],dict  
+  return 0,"","",dict   
+
 
 #
 # Pull existing inventory
 #
-inventories=getAWX("/api/v2/inventories")
-dictInventory=json.loads(inventories.text)
-print(dictInventory)
-for count,dict in enumerate(dictInventory['results']):
-    id = dict['id']
-    name = dict['name']
-    desc = dict['description']
-    org = dict['organization']
-    if name == "NITA WAN":
-        print(f"ID: {id}, Org: {org} Name: {name}, Description: {desc}")
-        #
-        # Example on how to modify original JSON
-        #
-        dictInventory['results'][count]['description']="NITA Test Inventory Again"
-        updated_json=json.dumps(dictInventory)
-        print(updated_json)
-        #
-        # Update description on server
-        #
-        inventories=patchAWX("/api/v2/inventories/"+str(id),dataDict='{"description":"NITA Test Inventory Again"}')
-        #
-        # Grab the "routers" group ID
-        #
-        group_url = dict['related']['groups']
-        groups=getAWX(group_url)
-        print(groups.text)
-        groupsList = json.loads(groups.text)
-        print(groups.status_code)
-        if groups.status_code == 200:
-            for groups_dict in groupsList['results']:
-                if groups_dict['name'] == "routers":
-                    group_id=groups_dict['id']
-                    print(f"Group ID: {group_id}")
+id,desc,org,inventory=getInventory("NITA WAN")
+if id != 0:
+  print(f"ID: {id}, Org: {org} Name: NITA WAN, Description: {desc}")
+  #
+  # Example on how to modify original JSON
+  #
+  inventory['description']="NITA WAN"
+  updated_json=json.dumps(inventory)
+
+  #
+  # Update description on server
+  #
+  response=patchAWX("/api/v2/inventories/"+str(id),dataDict='{"description":"NITA WAN"}')
+
+  #
+  # Grab the "routers" group ID
+  #
+  group_url = inventory['related']['groups']
+  groups=getAWX(group_url)
+  print(groups.text)
+  groupsList = json.loads(groups.text)
+  print(groups.status_code)
+  if groups.status_code == 200:
+    for groups_dict in groupsList['results']:
+      if groups_dict['name'] == "routers":
+          group_id=groups_dict['id']
+          print(f"Group ID: {group_id}")
+else:
+  print("Inventory not found")  
 
 #
 #Add pe3 host to existing inventory
 #
-response=postAWX("/api/v2/inventories/"+str(id)+"/hosts/",pe3_data_json)
-print(response.status_code)
-print(response.reason)
-if response.status_code==201:
-    host_id=json.loads(response.text)['id']
-    #
-    # Patch variable data to pe3 host
-    #
-    #response=requests.patch(AWX+"/api/v2/hosts/"+str(host_id)+"/variable_data/",headers=HEADER,auth=(USER,PASSWORD),data=pe3_var_json)
-    response=patchAWX("/api/v2/hosts/"+str(host_id)+"/variable_data/",pe3_var_json)
-    print(response.status_code)
-    print(response.reason)
-    #
-    # Add pe3 host to routers group
-    #
-    response=postAWX("/api/v2/hosts/"+str(host_id)+"/groups/",'{"id":'+str(group_id)+'}')
-    print(response.status_code)
-    print(response.reason)
-else:
-    print(response.text)
+response,host_id=addHost(id,pe3_data_json,pe3_var_json)
+# Add pe3 host to routers group
+#
+if host_id != 0: 
+   response=postAWX("/api/v2/hosts/"+str(host_id)+"/groups/",'{"id":'+str(group_id)+'}')
+   print(response.status_code)
+   print(response.reason)
