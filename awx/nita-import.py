@@ -149,6 +149,20 @@ def getInventory (inventory_name):
       return dict['id'],dict['description'],dict['organization'],dict  
   return 0,"","",dict   
 
+def getJobs (orgid):
+  jobs=getAWX(f"/api/v2/organizations/{orgid}/job_templates")
+  job_templates=json.loads(jobs.text)
+  return job_templates
+
+def getProject (orgid):
+  proj=getAWX(f"/api/v2/organizations/{orgid}/projects")
+  projects=json.loads(proj.text)
+  return projects
+
+def getEE (orgid):
+  proj=getAWX(f"/api/v2/organizations/{orgid}/projects")
+  projects=json.loads(proj.text)
+  return projects
 
 #
 # Pull existing inventory
@@ -165,7 +179,7 @@ if id != 0:
   #
   # Update description on server
   #
-  response=patchAWX("/api/v2/inventories/"+str(id),dataDict='{"description":"NITA WAN"}')
+  response=patchAWX(f"/api/v2/inventories/{id}",dataDict='{"description":"NITA WAN"}')
 
   #
   # Grab the "routers" group ID
@@ -182,6 +196,28 @@ if id != 0:
           print(f"Group ID: {group_id}")
 else:
   print("Inventory not found")  
+#
+#  Grab NITA Project
+# 
+nita_project=getProject(id)
+print(nita_project)
+# 
+# Grab Job Templates Inventory
+#
+nita_jobs=getJobs(id)
+print(nita_jobs)
+
+#
+# May not be a way to grab or add EE via API; Initial searches not coming up with anything. Maybe as Admin task via UI.
+#
+
+#
+# Add a new project
+#
+
+#
+# Add a job to the project
+#
 
 #
 #Add pe3 host to existing inventory
