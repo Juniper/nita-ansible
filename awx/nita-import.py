@@ -18,6 +18,15 @@ AWX="http://127.0.0.1:31768"
 #
 # Sample Data
 #
+project_data="""
+name: 'Sample Project'
+description: 'Sample Project Description'
+scm: ''
+status: 'ok'
+local_path: 'sample'
+"""
+##local_path: 'sample-test'
+
 pe3_data="""
 name: 100.123.1.3
 description: Test pe3
@@ -56,7 +65,7 @@ underlay_ebgp:
 """
 pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
 pe3_var_json=json.dumps(yaml.safe_load(pe3_var))
-
+project_json=json.dumps(yaml.safe_load(project_data))
 
 def getAWX (subURL):
     FMT="?format=json"
@@ -131,15 +140,7 @@ def postAWX (subURL, dataDict):
     except requests.exceptions.RequestException as req_err:
         print(f"An error occurred: {req_err}")
 
-def addHost (inventory_id, host_data, var_data):
-  #Simple function to add a host to AWX inventory 
-  host_id = 0
-  response=postAWX("/api/v2/inventories/"+str(inventory_id)+"/hosts/",host_data)
-  if response != "400 Bad Request":
-     if response.status_code == 201:
-      host_id=json.loads(response.text)['id']
-      response=patchAWX("/api/v2/hosts/"+str(host_id)+"/variable_data/",pe3_var_json)
-  return response, host_id
+
 
 def getInventory (inventory_name):
   inventories=getAWX("/api/v2/inventories")
@@ -155,21 +156,62 @@ def getJobs (orgid):
   return job_templates
 
 def getProject (orgid):
-  proj=getAWX(f"/api/v2/organizations/{orgid}/projects")
-  projects=json.loads(proj.text)
+  response=getAWX(f"/api/v2/organizations/{orgid}/projects")
+  projects=json.loads(response.text)
   return projects
 
-def getEE (orgid):
-  proj=getAWX(f"/api/v2/organizations/{orgid}/projects")
-  projects=json.loads(proj.text)
-  return projects
+def getEE(environment_name,orgid):
+  #Retrieves the ID of an execution environment by its name.
 
+  try:
+    response = getAWX(f"/api/v2/execution_environments/")
+
+    if response.status_code == 200:
+      # Parse the JSON response
+      environments = response.json()["results"]
+      for environment in environments:
+        if environment["name"] == environment_name:
+          return environment["id"],environment["description"],environment["image"]
+
+    """
+      #if the environment is not found in the first page, check subsequent pages
+      while "next" in response.json():
+        response = getAWX(response.json()["next"])
+        environments = response.json()["results"]
+        for environment in environments:
+          if environment["name"] == environment_name:
+            return environment["id"]
+    """
+    return None
+
+  except requests.exceptions.RequestException as e:
+    print(f"Request error: {e}")
+    return None
+
+def addHost (inventory_id, host_data, var_data):
+  #Simple function to add a host to AWX inventory 
+  host_id = 0
+  response=postAWX(f"/api/v2/inventories/{inventory_id}/hosts/",host_data)
+  if response != "400 Bad Request":
+     if response.status_code == 201:
+      host_id=json.loads(response.text)['id']
+      response=patchAWX(f"/api/v2/hosts/{host_id}/variable_data/",pe3_var_json)
+  return response, host_id
+
+def addProject(orgid,project):
+  #Simple function to add a host to AWX inventory 
+  project_id = 0
+  response=postAWX(f"/api/v2/organizations/{orgid}/projects",project)
+  if response != "400 Bad Request":
+     if response.status_code == 201:
+      project_id=json.loads(response.text)['id']
+  return response, project_id  
 #
 # Pull existing inventory
 #
-id,desc,org,inventory=getInventory("NITA WAN")
-if id != 0:
-  print(f"ID: {id}, Org: {org} Name: NITA WAN, Description: {desc}")
+orgid,desc,org,inventory=getInventory("NITA WAN")
+if orgid != 0:
+  print(f"ID: {orgid}, Org: {org} Name: NITA WAN, Description: {desc}")
   #
   # Example on how to modify original JSON
   #
@@ -179,7 +221,7 @@ if id != 0:
   #
   # Update description on server
   #
-  response=patchAWX(f"/api/v2/inventories/{id}",dataDict='{"description":"NITA WAN"}')
+  response=patchAWX(f"/api/v2/inventories/{orgid}",dataDict='{"description":"NITA WAN"}')
 
   #
   # Grab the "routers" group ID
@@ -199,33 +241,50 @@ else:
 #
 #  Grab NITA Project
 # 
-nita_project=getProject(id)
+nita_project=getProject(orgid)
 print(nita_project)
 # 
 # Grab Job Templates Inventory
 #
-nita_jobs=getJobs(id)
+nita_jobs=getJobs(orgid)
 print(nita_jobs)
 
 #
-# May not be a way to grab or add EE via API; Initial searches not coming up with anything. Maybe as Admin task via UI.
+# Grab EE ID
 #
 
-#
-# Add a new project
-#
+ee_id,ee_desc,ee_image = getEE("Juniper-EE",orgid)
+project_def_env = {
+  "id":ee_id,
+  "name":"Juniper-EE",
+  "description":ee_desc,
+  "image":ee_image
+}
+
 
 #
+# Add a new project. Note the local_path must exist on the AWX task container
+# It can be added manually to persistent storage area or within the container itself under /var/lib/awx/projects
+#
+print(project_json)
+project_dict=json.loads(project_json)
+project_dict['default_environment']=ee_id
+print(json.dumps(project_dict))
+response,project_id=addProject(orgid,json.dumps(project_dict))
+print(response)
+print(f"Project ID: {project_id}")
+
+#(inventory_id)
 # Add a job to the project
 #
 
 #
 #Add pe3 host to existing inventory
 #
-response,host_id=addHost(id,pe3_data_json,pe3_var_json)
+response,host_id=addHost(orgid,pe3_data_json,pe3_var_json)
 # Add pe3 host to routers group
 #
 if host_id != 0: 
-   response=postAWX("/api/v2/hosts/"+str(host_id)+"/groups/",'{"id":'+str(group_id)+'}')
+   response=postAWX(f"/api/v2/hosts/{host_id}/groups/",'{"id":'+str(group_id)+'}')
    print(response.status_code)
    print(response.reason)
