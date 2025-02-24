@@ -25,7 +25,16 @@ scm: ''
 status: 'ok'
 local_path: 'sample'
 """
-##local_path: 'sample-test'
+
+job_template_data = """
+name: 'Sample Job'
+description: 'Sample Job Description'
+job_type: 'run'
+playbook: 'playbook.yml'
+ask_inventory_on_launch: true
+variables: {\"vars\": {\"temp_dir\": \"/var/tmp\", \"build_dir\": \"/var/tmp/build\", \"log\": \"/var/tmp/build/log\"} }
+"""
+print(job_template_data)
 
 pe3_data="""
 name: 100.123.1.3
@@ -66,6 +75,7 @@ underlay_ebgp:
 pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
 pe3_var_json=json.dumps(yaml.safe_load(pe3_var))
 project_json=json.dumps(yaml.safe_load(project_data))
+job_template_json=json.dumps(yaml.safe_load(job_template_data))
 
 def getAWX (subURL):
     FMT="?format=json"
@@ -89,7 +99,7 @@ def getAWX (subURL):
     #print ("get: "+AWX+subURL+FMT)
     #return requests.get(AWX+subURL+FMT,auth=(USER,PASSWORD),headers=HEADER)
 
-def patchAWX (subURL, dataDict):
+def patchAWX (subURL, jsonData):
     FMT="?format=json"
     if FMT in subURL:
        FMT=""
@@ -100,7 +110,7 @@ def patchAWX (subURL, dataDict):
       #  print(f"Server unavailable: {response.status_code} {response.text}")
       #  sys.exit()
       #print ("patch: "+AWX+subURL)
-      return requests.patch(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
+      return requests.patch(AWX+subURL,data=jsonData,auth=(USER,PASSWORD),headers=HEADER)
     except requests.exceptions.HTTPError as http_err:
       if response.status_code == 400:
         print("400 Bad Request: {http_err}")
@@ -114,7 +124,7 @@ def patchAWX (subURL, dataDict):
     #print ("patch: "+AWX+subURL)
     #return requests.patch(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
     
-def postAWX (subURL, dataDict):
+def postAWX (subURL, jsonData):
     FMT="?format=json"
     if FMT in subURL:
        FMT=""
@@ -125,7 +135,7 @@ def postAWX (subURL, dataDict):
       #  print(f"Server unavailable: {response.status_code} {response.text}")
       #  sys.exit()
       print ("post: "+AWX+subURL)
-      response=requests.post(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
+      response=requests.post(AWX+subURL,data=jsonData,auth=(USER,PASSWORD),headers=HEADER)
       response.raise_for_status()
       
       return response
@@ -198,14 +208,31 @@ def addHost (inventory_id, host_data, var_data):
       response=patchAWX(f"/api/v2/hosts/{host_id}/variable_data/",pe3_var_json)
   return response, host_id
 
-def addProject(orgid,project):
-  #Simple function to add a host to AWX inventory 
+def addProject(orgid,ee_id,project):
+  #Simple function to add a host to Project to AWX 
   project_id = 0
-  response=postAWX(f"/api/v2/organizations/{orgid}/projects",project)
+  project_dict=json.loads(project)
+  project_dict['default_environment']=ee_id
+  final_project=json.dumps(project_dict)
+  print(final_project)
+  response=postAWX(f"/api/v2/organizations/{orgid}/projects/",final_project)
   if response != "400 Bad Request":
      if response.status_code == 201:
       project_id=json.loads(response.text)['id']
   return response, project_id  
+
+def addJobTemplate (project_id,job):
+  #Simple function to add a host to add a Job Template
+  job_template_id = 0
+  job_dict=json.loads(job)
+  job_dict["project"]=project_id
+  final_job=json.dumps(job_dict)
+  print(final_job)
+  response=postAWX(f"/api/v2/job_templates/",final_job)
+  if response != "400 Bad Request":
+     if response.status_code == 201:
+      job_template_id=json.loads(response.text)['id']
+  return response, job_template_id 
 #
 # Pull existing inventory
 #
@@ -221,7 +248,7 @@ if orgid != 0:
   #
   # Update description on server
   #
-  response=patchAWX(f"/api/v2/inventories/{orgid}",dataDict='{"description":"NITA WAN"}')
+  response=patchAWX(f"/api/v2/inventories/{orgid}/",jsonData='{"description":"NITA WAN"}')
 
   #
   # Grab the "routers" group ID
@@ -267,17 +294,18 @@ project_def_env = {
 # It can be added manually to persistent storage area or within the container itself under /var/lib/awx/projects
 #
 print(project_json)
-project_dict=json.loads(project_json)
-project_dict['default_environment']=ee_id
-print(json.dumps(project_dict))
-response,project_id=addProject(orgid,json.dumps(project_dict))
+#project_dict=json.loads(project_json)
+#project_dict['default_environment']=ee_id
+response,project_id=addProject(orgid,ee_id,project_json)
 print(response)
 print(f"Project ID: {project_id}")
 
 #(inventory_id)
 # Add a job to the project
 #
-
+response,job_template_id = addJobTemplate(project_id,job_template_json)
+print(job_template_id)
+print(response.text)
 #
 #Add pe3 host to existing inventory
 #
