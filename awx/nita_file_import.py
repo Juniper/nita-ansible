@@ -5,6 +5,13 @@ import requests
 import sys
 import json,yaml
 import base64
+from pathlib import Path
+
+USER="awx"
+PASSWORD="Juniper!1"
+credentials=f"{USER}:{PASSWORD}"
+encodeded_credentials=base64.b64encode(credentials.encode()).decode()
+AWX="http://127.0.0.1:31768"
 
 #from nita_import import *
 #pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
@@ -35,15 +42,25 @@ if __name__ == "__main__":
     # Example usage of list_directories
     directories = list_directories(nita_folder)
     print(f'Directories in {nita_folder}: {directories}')
+    hosts={}
     for directory in directories:
         project_folder = os.path.join(nita_folder, directory)
         yaml_files=get_yaml_files(project_folder)
         for yaml_file in yaml_files:
             with open(yaml_file, 'r') as file:
                 content = file.read()
-                host_json=json.dumps(yaml.safe_load(content))
+                host_json=json.loads(json.dumps(yaml.safe_load(content)))
                 host_name=os.path.basename(yaml_file).replace('.yaml','')
-                print(f'Contents of {host_name}:')
-                print(host_json)
-                print('---')
+                if host_name in hosts:
+                    print(f"Host {host_name} already exists")  
+                else:
+                    host_json["inventory"]=directory
+                    hosts[host_name]=host_json 
+        for index,(host,host_data) in enumerate(hosts.items()):
+            host_ip = host_data["management_interface"]["ip"]
+            host_inventory = host_data["inventory"]
+            print(f'{host}: {host_ip} {host_inventory} {host_data}') 
+            ### add host to AWX using directory name as inventory name. Not sure how else to do it without mapping X to Y
+            
+
 
