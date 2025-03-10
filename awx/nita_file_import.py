@@ -6,8 +6,8 @@ import sys
 import json,yaml
 import base64
 
-from "nita-import" import *
-pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
+#from nita_import import *
+#pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
 
 def get_yaml_files(project_folder):
     # Construct the path pattern for YAML files in host_vars
@@ -38,11 +38,12 @@ if __name__ == "__main__":
     for directory in directories:
         project_folder = os.path.join(nita_folder, directory)
         yaml_files=get_yaml_files(project_folder)
-        print(yaml_files)
-        #for yaml_file in yaml_files:
-        #    with open(yaml_file, 'r') as file:
-        #        content = file.read()
-        #        print(f'Contents of {yaml_file}:')
-        #        print(content)
-        #        print('---')
+        for yaml_file in yaml_files:
+            with open(yaml_file, 'r') as file:
+                content = file.read()
+                host_json=json.dumps(yaml.safe_load(content))
+                host_name=os.path.basename(yaml_file).replace('.yaml','')
+                print(f'Contents of {host_name}:')
+                print(host_json)
+                print('---')
 
