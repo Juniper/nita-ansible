@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import os
 import glob
-import requests
-import sys
-import json,yaml
-import base64
+
 from pathlib import Path
+from nita_awx_functions import *
 
 USER="awx"
 PASSWORD="Juniper!1"
