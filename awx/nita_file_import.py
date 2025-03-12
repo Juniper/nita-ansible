@@ -67,8 +67,13 @@ if __name__ == "__main__":
         for index,(host,host_data) in enumerate(hosts.items()):
             host_ip = host_data["management_interface"]["ip"]
             host_inventory = host_data["inventory"]
-            print(f'{host}: {host_ip} {host_inventory} {host_data}') 
-            #response,host_id=addHost(orgid,pe3_data_json,pe3_var_json)
+            host_dict=dict(name=host_ip,description=host,enabled=True)
+            print(f'{host_dict} {host_data}') 
+            print('---------------------------')
+            #
+            # Test to add hosts for now
+            #
+            response,host_id=addHost(3,json.dumps(host_dict),json.dumps(host_data),AWX,USER,PASSWORD)
             ### add host to AWX using directory name as inventory name. Not sure how else to do it without mapping X to Y
             
 
