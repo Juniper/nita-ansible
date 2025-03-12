@@ -2,14 +2,13 @@
 import os
 import glob
 
-from pathlib import Path
-from nita_awx_functions import *
 
-USER="awx"
-PASSWORD="Juniper!1"
-credentials=f"{USER}:{PASSWORD}"
-encodeded_credentials=base64.b64encode(credentials.encode()).decode()
-AWX="http://127.0.0.1:31768"
+from pathlib import Path
+
+
+
+
+from nita_awx_functions import *
 
 #from nita_import import *
 #pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
@@ -34,10 +33,21 @@ def list_directories(folder_path):
     return directories
 
 if __name__ == "__main__":
+    USER="awx"
+    PASSWORD="Juniper!1"
+    credentials=f"{USER}:{PASSWORD}"
+    encodeded_credentials=base64.b64encode(credentials.encode()).decode()
+    AWX="http://127.0.0.1:31768"
     nita_folder = '/var/nita_project'
 
-    
-    # Example usage of list_directories
+    #
+    # Just grabbing existing inventory file for now
+    #
+    orgid,desc,org,inventory=getInventory("NITA Hosts")
+    if orgid != 0:
+        print(f"ID: {orgid}, Org: {org} Name: NITA WAN, Description: {desc}")
+    else:
+        print("Inventory not found")
     directories = list_directories(nita_folder)
     print(f'Directories in {nita_folder}: {directories}')
     hosts={}
@@ -58,6 +68,7 @@ if __name__ == "__main__":
             host_ip = host_data["management_interface"]["ip"]
             host_inventory = host_data["inventory"]
             print(f'{host}: {host_ip} {host_inventory} {host_data}') 
+            #response,host_id=addHost(orgid,pe3_data_json,pe3_var_json)
             ### add host to AWX using directory name as inventory name. Not sure how else to do it without mapping X to Y
             
 
