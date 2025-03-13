@@ -39,19 +39,24 @@ if __name__ == "__main__":
     encodeded_credentials=base64.b64encode(credentials.encode()).decode()
     AWX="http://127.0.0.1:31768"
     nita_folder = '/var/nita_project'
-
-    #
-    # Just grabbing existing inventory file for now
-    #
-    orgid,desc,org,inventory=getInventory("NITA Hosts")
-    if orgid != 0:
-        print(f"ID: {orgid}, Org: {org} Name: NITA WAN, Description: {desc}")
-    else:
-        print("Inventory not found")
+    org,orgid=getOrg("NITA",AWX,USER,PASSWORD)
+    if orgid==0:
+        #
+        # Create NITA Organization with EE Environment
+        #
+        ee_id=4
+        org,orgid=addOrg("NITA","NITA Organization",ee_id,AWX,USER,PASSWORD)
     directories = list_directories(nita_folder)
     print(f'Directories in {nita_folder}: {directories}')
     hosts={}
+    inventory={}
     for directory in directories:
+        #
+        # Add directory as new inventory to use in add host
+        #
+        response,invid = addInventory(orgid,directory,AWX,USER,PASSWORD)
+        if invid != 0:
+            inventory[directory]=invid
         project_folder = os.path.join(nita_folder, directory)
         yaml_files=get_yaml_files(project_folder)
         for yaml_file in yaml_files:
@@ -66,15 +71,12 @@ if __name__ == "__main__":
                     hosts[host_name]=host_json 
         for index,(host,host_data) in enumerate(hosts.items()):
             host_ip = host_data["management_interface"]["ip"]
-            host_inventory = host_data["inventory"]
+            host_inventory = inventory[host_data["inventory"]]
             host_dict=dict(name=host_ip,description=host,enabled=True)
             print(f'{host_dict} {host_data}') 
             print('---------------------------')
-            #
-            # Test to add hosts for now
-            #
-            response,host_id=addHost(3,json.dumps(host_dict),json.dumps(host_data),AWX,USER,PASSWORD)
-            ### add host to AWX using directory name as inventory name. Not sure how else to do it without mapping X to Y
+            response,host_id=addHost(host_inventory,json.dumps(host_dict),json.dumps(host_data),AWX,USER,PASSWORD)
+
             
 
 

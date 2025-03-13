@@ -83,19 +83,26 @@ def postAWX (subURL, jsonData,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
         print(f"An error occurred: {req_err}")
 
 
-
 def getInventory (inventory_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   inventories=getAWX("/api/v2/inventories",AWX,USER,PASSWORD)
   dictInventory=json.loads(inventories.text)
   for dict in dictInventory['results']:
     if dict['name'] == inventory_name:
-      return dict['id'],dict['description'],dict['organization'],dict  
-  return 0,"",0,dict   
+      return dict,dict['id'],dict['description'],dict['organization']  
+  return dict,0,"",0   
 
 def getJobs (orgid,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   jobs=getAWX(f"/api/v2/organizations/{orgid}/job_templates",AWX,USER,PASSWORD)
   job_templates=json.loads(jobs.text)
   return job_templates
+
+def getOrg (inventory_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
+  org=getAWX("/api/v2/organizations",AWX,USER,PASSWORD)
+  dictOrg=json.loads(org.text)
+  for dict in dictOrg['results']:
+    if dict['name'] == inventory_name:
+      return dict,dict['id']  
+  return dict,0
 
 def getProject (orgid,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   response=getAWX(f"/api/v2/organizations/{orgid}/projects",AWX,USER,PASSWORD)
@@ -139,6 +146,36 @@ def addHost (inventory_id, host_data, var_data,AWX=AWX,USER=USER,PASSWORD=PASSWO
       host_id=json.loads(response.text)['id']
       response=patchAWX(f"/api/v2/hosts/{host_id}/variable_data/",var_data,AWX,USER,PASSWORD)
   return response, host_id
+
+def addInventory(orgid,invname,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
+  #Simple function to add Inventory to Project to AWX 
+  inventory_id = 0
+  inventory_dict={}
+  inventory_dict['name']=invname
+  inventory_dict['description']=invname
+  inventory_dict['organization']=orgid
+  final_inventory=json.dumps(inventory_dict)
+  print(inventory_dict)
+  response=postAWX(f"/api/v2/inventories/",final_inventory,AWX,USER,PASSWORD)
+  if response != "400 Bad Request":
+     if response.status_code == 201:
+      inventory_id=json.loads(response.text)['id']
+  return response, inventory_id  
+
+def addOrg(orgname,description,ee_id,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
+  #Simple function to add Organization to AWX 
+  org_id = 0
+  org_dict={}
+  org_dict['name']=orgname
+  org_dict['description']=description
+  org_dict['default_environment']=ee_id
+  final_org=json.dumps(org_dict)
+  print(final_org)
+  response=postAWX("/api/v2/organizations/",final_org,AWX,USER,PASSWORD)
+  if response != "400 Bad Request":
+     if response.status_code == 201:
+      org_id=json.loads(response.text)['id']
+  return response, org_id
 
 def addProject(orgid,ee_id,project,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   #Simple function to add a host to Project to AWX 

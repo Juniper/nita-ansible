@@ -77,7 +77,7 @@ job_template_json=json.dumps(yaml.safe_load(job_template_data))
 from nita_awx_functions import *
 #
 # Pull existing inventory
-invid,desc,orgid,inventory=getInventory("NITA")
+inventory,invid,desc,orgid=getInventory("NITA")
 if orgid != 0:
   print(f"ID: {invid}, Org: {orgid} Name: NITA, Description: {desc}")
   #
