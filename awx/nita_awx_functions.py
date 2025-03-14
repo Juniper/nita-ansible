@@ -109,7 +109,7 @@ def getProject (orgid,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   projects=json.loads(response.text)
   return projects
 
-def getEE(environment_name,orgid,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
+def getEE(environment_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   #Retrieves the ID of an execution environment by its name.
 
   try:
@@ -137,6 +137,25 @@ def getEE(environment_name,orgid,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
     print(f"Request error: {e}")
     return None
 
+def addEE (name, description, image,pull,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
+  #Simple function to add EE to AWX inventory 
+  ee_id = 0
+  ee_dict={}
+  ee_dict["name"]=name
+  ee_dict["description"]=description
+  ee_dict["image"]=image
+  ee_dict["pull"]=pull
+  final_ee=json.dumps(ee_dict)
+  print(final_ee)
+  response=postAWX(f"/api/v2/execution_environments/",final_ee,AWX,USER,PASSWORD)
+  if response != "400 Bad Request":
+    if response.status_code == 201:
+      ee_id=json.loads(response.text)['id']
+  else:
+    ee_id,ee_desc,ee_env=getEE(name,AWX,USER,PASSWORD)
+
+  return response, ee_id
+
 def addHost (inventory_id, host_data, var_data,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   #Simple function to add a host to AWX inventory 
   host_id = 0
@@ -160,6 +179,8 @@ def addInventory(orgid,invname,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   if response != "400 Bad Request":
      if response.status_code == 201:
       inventory_id=json.loads(response.text)['id']
+  else:
+    inv,inventory_id,inv_desc,inv_org=getInventory(invname,AWX,USER,PASSWORD) 
   return response, inventory_id  
 
 def addOrg(orgname,description,ee_id,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
@@ -175,6 +196,8 @@ def addOrg(orgname,description,ee_id,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   if response != "400 Bad Request":
      if response.status_code == 201:
       org_id=json.loads(response.text)['id']
+  else:
+    org,org_id=getOrg(orgname,AWX,USER,PASSWORD)
   return response, org_id
 
 def addProject(orgid,ee_id,project,AWX=AWX,USER=USER,PASSWORD=PASSWORD):

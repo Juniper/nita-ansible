@@ -39,13 +39,13 @@ if __name__ == "__main__":
     encodeded_credentials=base64.b64encode(credentials.encode()).decode()
     AWX="http://127.0.0.1:31768"
     nita_folder = '/var/nita_project'
-    org,orgid=getOrg("NITA",AWX,USER,PASSWORD)
-    if orgid==0:
-        #
-        # Create NITA Organization with EE Environment
-        #
-        ee_id=4
-        org,orgid=addOrg("NITA","NITA Organization",ee_id,AWX,USER,PASSWORD)
+    #
+    # Create Execution Environment
+    #
+    response,eeid=addEE("Juniper-EE","Juniper AWX EE","localhost:5000/nita-ansible-ee","always",AWX,USER,PASSWORD)
+    print(f"{eeid} {response}")
+    response,orgid=addOrg("NITA","NITA Organization",eeid,AWX,USER,PASSWORD)
+
     directories = list_directories(nita_folder)
     print(f'Directories in {nita_folder}: {directories}')
     hosts={}
