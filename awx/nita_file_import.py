@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 import glob
-
+import yaml
 
 from pathlib import Path
 
@@ -33,18 +33,18 @@ def list_directories(folder_path):
     return directories
 
 if __name__ == "__main__":
-    USER="awx"
-    PASSWORD="Juniper!1"
-    credentials=f"{USER}:{PASSWORD}"
+    user="awx"
+    password="Juniper!1"
+    credentials=f"{user}:{password}"
     encodeded_credentials=base64.b64encode(credentials.encode()).decode()
-    AWX="http://127.0.0.1:31768"
+    awx="http://127.0.0.1:31768"
     nita_folder = '/var/nita_project'
     #
     # Create Execution Environment
     #
-    response,eeid=addEE("Juniper-EE","Juniper AWX EE","localhost:5000/nita-ansible-ee","always",AWX,USER,PASSWORD)
+    response,eeid=add_ee("Juniper-EE","Juniper awx EE","localhost:5000/nita-ansible-ee","always",awx,user,password)
     print(f"{eeid} {response}")
-    response,orgid=addOrg("NITA","NITA Organization",eeid,AWX,USER,PASSWORD)
+    response,orgid=add_org("NITA","NITA Organization",eeid,awx,user,password)
 
     directories = list_directories(nita_folder)
     print(f'Directories in {nita_folder}: {directories}')
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         #
         # Add directory as new inventory to use in add host
         #
-        response,invid = addInventory(orgid,directory,AWX,USER,PASSWORD)
+        response,invid = add_inventory(orgid,directory,awx,user,password)
         if invid != 0:
             inventory[directory]=invid
         project_folder = os.path.join(nita_folder, directory)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
             host_dict=dict(name=host_ip,description=host,enabled=True)
             print(f'{host_dict} {host_data}') 
             print('---------------------------')
-            response,host_id=addHost(host_inventory,json.dumps(host_dict),json.dumps(host_data),AWX,USER,PASSWORD)
+            response,host_id=add_host(host_inventory,json.dumps(host_dict),json.dumps(host_data),awx,user,password)
 
             
 

@@ -1,73 +1,73 @@
 import requests
 import sys
-import json,yaml
+import json
 import base64
 
-USER="awx"
-PASSWORD="Juniper!1"
-credentials=f"{USER}:{PASSWORD}"
+user="awx"
+password="Juniper!1"
+credentials=f"{user}:{password}"
 encodeded_credentials=base64.b64encode(credentials.encode()).decode()
-AWX="http://127.0.0.1:31768"
+awx="http://127.0.0.1:31768"
 
-def getAWX (subURL,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-    FMT="?format=json"
-    if FMT in subURL:
-       FMT=""
-    HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
+def get_awx (sub_url,awx=awx,user=user,password=password):
+    fmt="?format=json"
+    if fmt in sub_url:
+       fmt=""
+    header={'Content-type': 'application/json', 'Accept': 'application/json'}
     try:
-      response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+      response=requests.get(awx+"/api/login",auth=(user,password))
       if response.status_code != 200:
         print(f"Server unavailable: {response.status_code} {response.text}")
         sys.exit()
-      print ("get: "+AWX+subURL+FMT)
-      return requests.get(AWX+subURL+FMT,auth=(USER,PASSWORD),headers=HEADER)
+      print ("get: "+awx+sub_url+fmt)
+      return requests.get(awx+sub_url+fmt,auth=(user,password),headers=header)
     except requests.exceptions.RequestException as e:
       print(f"Server unavailable: {e}")
       sys.exit()
-    #response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+    #response=requests.get(awx+"/api/login",auth=(user,password))
     #if response.status_code != 200:
     #  print(f"Server unavailable: {response.status_code} {response.text}")
     #  sys.exit()
-    #print ("get: "+AWX+subURL+FMT)
-    #return requests.get(AWX+subURL+FMT,auth=(USER,PASSWORD),headers=HEADER)
+    #print ("get: "+awx+sub_url+fmt)
+    #return requests.get(awx+sub_url+fmt,auth=(user,password),headers=header)
 
-def patchAWX (subURL, jsonData,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-    FMT="?format=json"
-    if FMT in subURL:
-       FMT=""
-    HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
+def patch_awx (sub_url, jsonData,awx=awx,user=user,password=password):
+    fmt="?format=json"
+    if fmt in sub_url:
+       fmt=""
+    header={'Content-type': 'application/json', 'Accept': 'application/json'}
     try:
-      response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+      response=requests.get(awx+"/api/login",auth=(user,password))
       #if response.status_code != 200:
       #  print(f"Server unavailable: {response.status_code} {response.text}")
       #  sys.exit()
-      #print ("patch: "+AWX+subURL)
-      return requests.patch(AWX+subURL,data=jsonData,auth=(USER,PASSWORD),headers=HEADER)
+      #print ("patch: "+awx+sub_url)
+      return requests.patch(awx+sub_url,data=jsonData,auth=(user,password),headers=header)
     except requests.exceptions.HTTPError as http_err:
       if response.status_code == 400:
         print("400 Bad Request: {http_err}")
     except requests.exceptions.RequestException as e:
       print(f"Server unavailable: {e}")
       sys.exit()
-    #response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+    #response=requests.get(awx+"/api/login",auth=(user,password))
     #if response.status_code != 200:
     #  print(f"Server unavailable: {response.status_code} {response.text}")
     #  sys.exit()
-    #print ("patch: "+AWX+subURL)
-    #return requests.patch(AWX+subURL,data=dataDict,auth=(USER,PASSWORD),headers=HEADER)
+    #print ("patch: "+awx+sub_url)
+    #return requests.patch(awx+sub_url,data=dataDict,auth=(user,password),headers=header)
     
-def postAWX (subURL, jsonData,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-    FMT="?format=json"
-    if FMT in subURL:
-       FMT=""
-    HEADER={'Content-type': 'application/json', 'Accept': 'application/json'}
+def post_awx (sub_url, jsonData,awx=awx,user=user,password=password):
+    fmt="?format=json"
+    if fmt in sub_url:
+       fmt=""
+    header={'Content-type': 'application/json', 'Accept': 'application/json'}
     try:
-      response=requests.get(AWX+"/api/login",auth=(USER,PASSWORD))
+      response=requests.get(awx+"/api/login",auth=(user,password))
       #if response.status_code != 200:
       #  print(f"Server unavailable: {response.status_code} {response.text}")
       #  sys.exit()
-      print ("post: "+AWX+subURL)
-      response=requests.post(AWX+subURL,data=jsonData,auth=(USER,PASSWORD),headers=HEADER)
+      print ("post: "+awx+sub_url)
+      response=requests.post(awx+sub_url,data=jsonData,auth=(user,password),headers=header)
       response.raise_for_status()
       
       return response
@@ -83,37 +83,37 @@ def postAWX (subURL, jsonData,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
         print(f"An error occurred: {req_err}")
 
 
-def getInventory (inventory_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  inventories=getAWX("/api/v2/inventories",AWX,USER,PASSWORD)
+def get_inventory (inventory_name,awx=awx,user=user,password=password):
+  inventories=get_awx("/api/v2/inventories",awx,user,password)
   dictInventory=json.loads(inventories.text)
   for dict in dictInventory['results']:
     if dict['name'] == inventory_name:
       return dict,dict['id'],dict['description'],dict['organization']  
   return dict,0,"",0   
 
-def getJobs (orgid,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  jobs=getAWX(f"/api/v2/organizations/{orgid}/job_templates",AWX,USER,PASSWORD)
+def get_job_templates (orgid,awx=awx,user=user,password=password):
+  jobs=get_awx(f"/api/v2/organizations/{orgid}/job_templates",awx,user,password)
   job_templates=json.loads(jobs.text)
   return job_templates
 
-def getOrg (inventory_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  org=getAWX("/api/v2/organizations",AWX,USER,PASSWORD)
+def get_org (inventory_name,awx=awx,user=user,password=password):
+  org=get_awx("/api/v2/organizations",awx,user,password)
   dictOrg=json.loads(org.text)
   for dict in dictOrg['results']:
     if dict['name'] == inventory_name:
       return dict,dict['id']  
   return dict,0
 
-def getProject (orgid,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  response=getAWX(f"/api/v2/organizations/{orgid}/projects",AWX,USER,PASSWORD)
+def get_project (orgid,awx=awx,user=user,password=password):
+  response=get_awx(f"/api/v2/organizations/{orgid}/projects",awx,user,password)
   projects=json.loads(response.text)
   return projects
 
-def getEE(environment_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
+def get_ee(environment_name,awx=awx,user=user,password=password):
   #Retrieves the ID of an execution environment by its name.
 
   try:
-    response = getAWX(f"/api/v2/execution_environments/",AWX,USER,PASSWORD)
+    response = get_awx(f"/api/v2/execution_environments/",awx,user,password)
 
     if response.status_code == 200:
       # Parse the JSON response
@@ -125,7 +125,7 @@ def getEE(environment_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
     """
       #if the environment is not found in the first page, check subsequent pages
       while "next" in response.json():
-        response = getAWX(response.json()["next"])
+        response = get_awx(response.json()["next"])
         environments = response.json()["results"]
         for environment in environments:
           if environment["name"] == environment_name:
@@ -137,8 +137,8 @@ def getEE(environment_name,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
     print(f"Request error: {e}")
     return None
 
-def addEE (name, description, image,pull,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  #Simple function to add EE to AWX inventory 
+def add_ee (name, description, image,pull,awx=awx,user=user,password=password):
+  #Simple function to add EE to awx inventory 
   ee_id = 0
   ee_dict={}
   ee_dict["name"]=name
@@ -147,27 +147,27 @@ def addEE (name, description, image,pull,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   ee_dict["pull"]=pull
   final_ee=json.dumps(ee_dict)
   print(final_ee)
-  response=postAWX(f"/api/v2/execution_environments/",final_ee,AWX,USER,PASSWORD)
+  response=post_awx(f"/api/v2/execution_environments/",final_ee,awx,user,password)
   if response != "400 Bad Request":
     if response.status_code == 201:
       ee_id=json.loads(response.text)['id']
   else:
-    ee_id,ee_desc,ee_env=getEE(name,AWX,USER,PASSWORD)
+    ee_id,ee_desc,ee_env=get_ee(name,awx,user,password)
 
   return response, ee_id
 
-def addHost (inventory_id, host_data, var_data,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  #Simple function to add a host to AWX inventory 
+def add_host (inventory_id, host_data, var_data,awx=awx,user=user,password=password):
+  #Simple function to add a host to awx inventory 
   host_id = 0
-  response=postAWX(f"/api/v2/inventories/{inventory_id}/hosts/",host_data,AWX,USER,PASSWORD)
+  response=post_awx(f"/api/v2/inventories/{inventory_id}/hosts/",host_data,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
       host_id=json.loads(response.text)['id']
-      response=patchAWX(f"/api/v2/hosts/{host_id}/variable_data/",var_data,AWX,USER,PASSWORD)
+      response=patch_awx(f"/api/v2/hosts/{host_id}/variable_data/",var_data,awx,user,password)
   return response, host_id
 
-def addInventory(orgid,invname,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  #Simple function to add Inventory to Project to AWX 
+def add_inventory(orgid,invname,awx=awx,user=user,password=password):
+  #Simple function to add Inventory to Project to awx 
   inventory_id = 0
   inventory_dict={}
   inventory_dict['name']=invname
@@ -175,16 +175,16 @@ def addInventory(orgid,invname,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   inventory_dict['organization']=orgid
   final_inventory=json.dumps(inventory_dict)
   print(inventory_dict)
-  response=postAWX(f"/api/v2/inventories/",final_inventory,AWX,USER,PASSWORD)
+  response=post_awx(f"/api/v2/inventories/",final_inventory,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
       inventory_id=json.loads(response.text)['id']
   else:
-    inv,inventory_id,inv_desc,inv_org=getInventory(invname,AWX,USER,PASSWORD) 
+    inv,inventory_id,inv_desc,inv_org=get_inventory(invname,awx,user,password) 
   return response, inventory_id  
 
-def addOrg(orgname,description,ee_id,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  #Simple function to add Organization to AWX 
+def add_org(orgname,description,ee_id,awx=awx,user=user,password=password):
+  #Simple function to add Organization to awx 
   org_id = 0
   org_dict={}
   org_dict['name']=orgname
@@ -192,35 +192,35 @@ def addOrg(orgname,description,ee_id,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
   org_dict['default_environment']=ee_id
   final_org=json.dumps(org_dict)
   print(final_org)
-  response=postAWX("/api/v2/organizations/",final_org,AWX,USER,PASSWORD)
+  response=post_awx("/api/v2/organizations/",final_org,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
       org_id=json.loads(response.text)['id']
   else:
-    org,org_id=getOrg(orgname,AWX,USER,PASSWORD)
+    org,org_id=get_org(orgname,awx,user,password)
   return response, org_id
 
-def addProject(orgid,ee_id,project,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
-  #Simple function to add a host to Project to AWX 
+def add_project(orgid,ee_id,project,awx=awx,user=user,password=password):
+  #Simple function to add a host to Project to awx 
   project_id = 0
   project_dict=json.loads(project)
   project_dict['default_environment']=ee_id
   final_project=json.dumps(project_dict)
   print(final_project)
-  response=postAWX(f"/api/v2/organizations/{orgid}/projects/",final_project,AWX,USER,PASSWORD)
+  response=post_awx(f"/api/v2/organizations/{orgid}/projects/",final_project,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
       project_id=json.loads(response.text)['id']
   return response, project_id  
 
-def addJobTemplate (project_id,job,AWX=AWX,USER=USER,PASSWORD=PASSWORD):
+def add_job_template (project_id,job,awx=awx,user=user,password=password):
   #Simple function to add a host to add a Job Template
   job_template_id = 0
   job_dict=json.loads(job)
   job_dict["project"]=project_id
   final_job=json.dumps(job_dict)
   print(final_job)
-  response=postAWX(f"/api/v2/job_templates/",final_job,AWX,USER,PASSWORD)
+  response=post_awx(f"/api/v2/job_templates/",final_job,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
       job_template_id=json.loads(response.text)['id']
