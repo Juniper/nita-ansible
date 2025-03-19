@@ -73,9 +73,17 @@ if __name__ == "__main__":
             host_ip = host_data["management_interface"]["ip"]
             host_inventory = inventory[host_data["inventory"]]
             host_dict=dict(name=host_ip,description=host,enabled=True)
+            host_id=0
             print(f'{host_dict} {host_data}') 
-            print('---------------------------')
+
             response,host_id=add_host(host_inventory,json.dumps(host_dict),json.dumps(host_data),awx,user,password)
+            if response!="400 Bad Request":
+                print(f"Host added ID: {host_id}")
+            elif host_id!=0:
+                print(f"Host exists ID: {host_id} ")
+            else:
+                print(f"Error adding host: {response}")
+            print('---------------------------')
 
             
 

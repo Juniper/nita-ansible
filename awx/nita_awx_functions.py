@@ -89,7 +89,15 @@ def get_inventory (inventory_name,awx=awx,user=user,password=password):
   for dict in dictInventory['results']:
     if dict['name'] == inventory_name:
       return dict,dict['id'],dict['description'],dict['organization']  
-  return dict,0,"",0   
+  return dictInventory,0,"",0   
+
+def get_host (host_name,inventory_id,awx=awx,user=user,password=password):
+  hosts = get_awx(f"/api/v2/inventories/{inventory_id}/hosts/",awx,user,password)
+  hostsInv = json.loads(hosts.text)
+  for host in hostsInv['results']:
+    if host['name'] == host_name:
+      return host,host['id']
+  return hostsInv,0
 
 def get_job_templates (orgid,awx=awx,user=user,password=password):
   jobs=get_awx(f"/api/v2/organizations/{orgid}/job_templates",awx,user,password)
@@ -161,9 +169,14 @@ def add_host (inventory_id, host_data, var_data,awx=awx,user=user,password=passw
   host_id = 0
   response=post_awx(f"/api/v2/inventories/{inventory_id}/hosts/",host_data,awx,user,password)
   if response != "400 Bad Request":
-     if response.status_code == 201:
+    if response.status_code == 201:
       host_id=json.loads(response.text)['id']
       response=patch_awx(f"/api/v2/hosts/{host_id}/variable_data/",var_data,awx,user,password)
+  else:
+    #
+    # get_host returns host struct and host_id...only need ID
+    #
+    host,host_id=get_host(json.loads(host_data)['name'],inventory_id,awx,user,password)
   return response, host_id
 
 def add_inventory(orgid,invname,awx=awx,user=user,password=password):
@@ -171,6 +184,7 @@ def add_inventory(orgid,invname,awx=awx,user=user,password=password):
   inventory_id = 0
   inventory_dict={}
   inventory_dict['name']=invname
+
   inventory_dict['description']=invname
   inventory_dict['organization']=orgid
   final_inventory=json.dumps(inventory_dict)
