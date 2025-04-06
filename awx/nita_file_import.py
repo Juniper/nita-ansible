@@ -13,9 +13,9 @@ from nita_awx_functions import *
 #from nita_import import *
 #pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
 
-def get_yaml_files(project_folder):
+def get_yaml_files(project_folder,subfolder):
     # Construct the path pattern for YAML files in host_vars
-    yaml_files_pattern = os.path.join(project_folder, 'host_vars', '*.yaml')
+    yaml_files_pattern = os.path.join(project_folder, subfolder, '*.yaml')
     
     # Use glob to find all YAML files matching the pattern
     yaml_files = glob.glob(yaml_files_pattern)
@@ -27,6 +27,7 @@ def get_yaml_files(project_folder):
             print(f'Contents of {yaml_file}:')
             print(content)
             print('---')
+
 
 def list_directories(folder_path):
     directories = [d for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
@@ -42,10 +43,14 @@ if __name__ == "__main__":
     #
     # Create Execution Environment
     #
-    response,eeid=add_ee("Juniper-EE","Juniper awx EE","localhost:5000/nita-ansible-ee","always",awx,user,password)
-    print(f"{eeid} {response}")
-    response,orgid=add_org("NITA","NITA Organization",eeid,awx,user,password)
+    response,ee_id=add_ee("Juniper-EE","Juniper awx EE","localhost:5000/nita-ansible-ee","always",awx,user,password)
+    print(f"{ee_id} {response}")
+    #
+    # Add Org and Project
+    response,org_id=add_org("NITA","NITA Organization",ee_id,awx,user,password)
 
+    response, project_id=add_project("NITA Project","NITA Project",org_id,ee_id,awx,user,password)
+    print(f"{project_id} {response}")
     directories = list_directories(nita_folder)
     print(f'Directories in {nita_folder}: {directories}')
     hosts={}
@@ -54,12 +59,15 @@ if __name__ == "__main__":
         #
         # Add directory as new inventory to use in add host
         #
-        response,invid = add_inventory(orgid,directory,awx,user,password)
+        response,invid = add_inventory(org_id,directory,awx,user,password)
         if invid != 0:
             inventory[directory]=invid
         project_folder = os.path.join(nita_folder, directory)
-        yaml_files=get_yaml_files(project_folder)
-        for yaml_file in yaml_files:
+        #
+        # Parse Host Data
+        #
+        host_files=get_yaml_files(project_folder,'host_vars')
+        for yaml_file in host_files:
             with open(yaml_file, 'r') as file:
                 content = file.read()
                 host_json=json.loads(json.dumps(yaml.safe_load(content)))
@@ -84,6 +92,22 @@ if __name__ == "__main__":
             else:
                 print(f"Error adding host: {response}")
             print('---------------------------')
+        #
+        # Grab build project file (should only be one)
+        # This may require a change cli commands to create folder structure in AWX (researching)
+        # 
+        build_file=get_yaml_files(project_folder,'build')
+        print(f"Build file: {build_file} {directory}")
+        job_name=f"name: {directory}-build"
+        playbook_file=f"playbook: {directory}/build/{os.path.basename(build_file[0])}"
+        job_template_data = """
+job_type: 'run'
+ask_inventory_on_launch: true
+variables: {\"vars\": {\"temp_dir\": \"/var/tmp\", \"build_dir\": \"/var/tmp/build\", \"log\": \"/var/tmp/build/log\"} }
+"""
+        job_template_data = job_name+'\n'+playbook_file+job_template_data
+        response,job_template_id=add_job_template(project_id,json.dumps(yaml.safe_load(job_template_data)),awx,user,password)
+        print(f"Job Template ID: {job_template_id}")
 
             
 

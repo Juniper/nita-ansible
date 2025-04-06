@@ -106,16 +106,19 @@ def get_job_templates (orgid,awx=awx,user=user,password=password):
 
 def get_org (inventory_name,awx=awx,user=user,password=password):
   org=get_awx("/api/v2/organizations",awx,user,password)
-  dictOrg=json.loads(org.text)
-  for dict in dictOrg['results']:
+  org_dict=json.loads(org.text)
+  for dict in org_dict['results']:
     if dict['name'] == inventory_name:
       return dict,dict['id']  
   return dict,0
 
-def get_project (orgid,awx=awx,user=user,password=password):
-  response=get_awx(f"/api/v2/organizations/{orgid}/projects",awx,user,password)
-  projects=json.loads(response.text)
-  return projects
+def get_project (orgid,name,awx=awx,user=user,password=password):
+  projects=get_awx(f"/api/v2/organizations/{orgid}/projects",awx,user,password)
+  project_dict=json.loads(projects.text)
+  for dict in project_dict['results']:
+    if dict['name'] == name:
+      return dict,dict['id'],
+  return dict,0
 
 def get_ee(environment_name,awx=awx,user=user,password=password):
   #Retrieves the ID of an execution environment by its name.
@@ -213,19 +216,24 @@ def add_org(orgname,description,ee_id,awx=awx,user=user,password=password):
   else:
     org,org_id=get_org(orgname,awx,user,password)
   return response, org_id
-
-def add_project(orgid,ee_id,project,awx=awx,user=user,password=password):
-  #Simple function to add a host to Project to awx 
-  project_id = 0
-  project_dict=json.loads(project)
-  project_dict['default_environment']=ee_id
-  final_project=json.dumps(project_dict)
-  print(final_project)
-  response=post_awx(f"/api/v2/organizations/{orgid}/projects/",final_project,awx,user,password)
+  
+def add_project(projname,description,org_id,ee_id,awx=awx,user=user,password=password):
+  #Simple function to add Organization to awx 
+  proj_id = 0
+  proj_dict={}
+  proj_dict['name']=projname
+  proj_dict['description']=description
+  proj_dict['default_environment']=ee_id
+  final_proj=json.dumps(proj_dict)
+  print(final_proj)
+  response=post_awx(f"/api/v2/organizations/{org_id}/projects/",final_proj,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
-      project_id=json.loads(response.text)['id']
-  return response, project_id  
+      proj_id=json.loads(response.text)['id']
+  else:
+    project,proj_id=get_project(org_id,projname,awx,user,password)
+  return response, proj_id
+
 
 def add_job_template (project_id,job,awx=awx,user=user,password=password):
   #Simple function to add a host to add a Job Template
