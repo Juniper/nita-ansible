@@ -39,7 +39,13 @@ if __name__ == "__main__":
     credentials=f"{user}:{password}"
     encodeded_credentials=base64.b64encode(credentials.encode()).decode()
     awx="http://127.0.0.1:31768"
-    nita_folder = '/var/nita_project'
+    #
+    # NITA files need to be copied to AWX persistent volume
+    # cp -r /var/nita_project /data/projects/
+    # This allows playbooks to be run from the AWX GUI
+    #
+    proj_folder = '/data/projects/nita_project'
+    playbook_directory = 'nita_project'
     #
     # Create Execution Environment
     #
@@ -49,10 +55,10 @@ if __name__ == "__main__":
     # Add Org and Project
     response,org_id=add_org("NITA","NITA Organization",ee_id,awx,user,password)
 
-    response, project_id=add_project("NITA Project","NITA Project",org_id,ee_id,awx,user,password)
+    response, project_id=add_project("NITA Project","NITA Project",org_id,ee_id,playbook_directory,awx,user,password)
     print(f"{project_id} {response}")
-    directories = list_directories(nita_folder)
-    print(f'Directories in {nita_folder}: {directories}')
+    directories = list_directories(proj_folder)
+    print(f'Directories in {proj_folder}: {directories}')
     hosts={}
     inventory={}
     for directory in directories:
@@ -62,7 +68,7 @@ if __name__ == "__main__":
         response,invid = add_inventory(org_id,directory,awx,user,password)
         if invid != 0:
             inventory[directory]=invid
-        project_folder = os.path.join(nita_folder, directory)
+        project_folder = os.path.join(proj_folder, directory)
         #
         # Parse Host Data
         #
@@ -102,11 +108,14 @@ if __name__ == "__main__":
         playbook_file=f"playbook: {directory}/build/{os.path.basename(build_file[0])}"
         job_template_data = """
 job_type: 'run'
-ask_inventory_on_launch: true
-variables: {\"vars\": {\"temp_dir\": \"/var/tmp\", \"build_dir\": \"/var/tmp/build\", \"log\": \"/var/tmp/build/log\"} }
+ask_inventory_on_launch: false
+ask_credential_on_launch: false
+ask_verbosity_on_launch: false
 """
+        extra_vars='{"vars": {"temp_dir": "/var/tmp", "build_dir": "/var/tmp/build", "log": "/var/tmp/build/log"}}'
+
         job_template_data = job_name+'\n'+playbook_file+job_template_data
-        response,job_template_id=add_job_template(project_id,json.dumps(yaml.safe_load(job_template_data)),awx,user,password)
+        response,job_template_id=add_job_template(project_id,invid,json.dumps(yaml.safe_load(job_template_data)),json.dumps(yaml.safe_load(extra_vars)),awx,user,password)
         print(f"Job Template ID: {job_template_id}")
 
             

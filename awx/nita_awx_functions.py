@@ -217,13 +217,14 @@ def add_org(orgname,description,ee_id,awx=awx,user=user,password=password):
     org,org_id=get_org(orgname,awx,user,password)
   return response, org_id
   
-def add_project(projname,description,org_id,ee_id,awx=awx,user=user,password=password):
+def add_project(projname,description,org_id,ee_id,playbook_dir,awx=awx,user=user,password=password):
   #Simple function to add Organization to awx 
   proj_id = 0
   proj_dict={}
   proj_dict['name']=projname
   proj_dict['description']=description
   proj_dict['default_environment']=ee_id
+  proj_dict['local_path']=playbook_dir
   final_proj=json.dumps(proj_dict)
   print(final_proj)
   response=post_awx(f"/api/v2/organizations/{org_id}/projects/",final_proj,awx,user,password)
@@ -235,11 +236,13 @@ def add_project(projname,description,org_id,ee_id,awx=awx,user=user,password=pas
   return response, proj_id
 
 
-def add_job_template (project_id,job,awx=awx,user=user,password=password):
+def add_job_template (project_id,invid,job,extra_vars="",awx=awx,user=user,password=password):
   #Simple function to add a host to add a Job Template
   job_template_id = 0
   job_dict=json.loads(job)
   job_dict["project"]=project_id
+  job_dict["inventory"]=invid
+  job_dict["extra_vars"]=extra_vars
   final_job=json.dumps(job_dict)
   print(final_job)
   response=post_awx(f"/api/v2/job_templates/",final_job,awx,user,password)
