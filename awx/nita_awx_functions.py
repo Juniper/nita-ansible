@@ -236,13 +236,14 @@ def add_project(projname,description,org_id,ee_id,playbook_dir,awx=awx,user=user
   return response, proj_id
 
 
-def add_job_template (project_id,invid,job,extra_vars="",awx=awx,user=user,password=password):
+def add_job_template (project_id,inv_id,ee_id,job,extra_vars="",awx=awx,user=user,password=password):
   #Simple function to add a host to add a Job Template
   job_template_id = 0
   job_dict=json.loads(job)
   job_dict["project"]=project_id
-  job_dict["inventory"]=invid
+  job_dict["inventory"]=inv_id
   job_dict["extra_vars"]=extra_vars
+  job_dict["execution_environment"]=ee_id
   final_job=json.dumps(job_dict)
   print(final_job)
   response=post_awx(f"/api/v2/job_templates/",final_job,awx,user,password)

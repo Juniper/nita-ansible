@@ -65,9 +65,9 @@ if __name__ == "__main__":
         #
         # Add directory as new inventory to use in add host
         #
-        response,invid = add_inventory(org_id,directory,awx,user,password)
-        if invid != 0:
-            inventory[directory]=invid
+        response,inv_id = add_inventory(org_id,directory,awx,user,password)
+        if inv_id != 0:
+            inventory[directory]=inv_id
         project_folder = os.path.join(proj_folder, directory)
         #
         # Parse Host Data
@@ -82,26 +82,31 @@ if __name__ == "__main__":
                     print(f"Host {host_name} already exists")  
                 else:
                     host_json["inventory"]=directory
+                    host_json["ansible_host"]=host_json["management_interface"]["ip"]
                     hosts[host_name]=host_json 
-        for index,(host,host_data) in enumerate(hosts.items()):
-            host_ip = host_data["management_interface"]["ip"]
-            host_inventory = inventory[host_data["inventory"]]
-            host_dict=dict(name=host_ip,description=host,enabled=True)
-            host_id=0
-            print(f'{host_dict} {host_data}') 
-
-            response,host_id=add_host(host_inventory,json.dumps(host_dict),json.dumps(host_data),awx,user,password)
-            if response!="400 Bad Request":
-                print(f"Host added ID: {host_id}")
-            elif host_id!=0:
-                print(f"Host exists ID: {host_id} ")
-            else:
-                print(f"Error adding host: {response}")
-            print('---------------------------')
+        with open ('hosts.txt', 'w',encoding='utf-8') as hostfile:
+            for index,(host,host_data) in enumerate(hosts.items()):
+                host_ip = host_data["management_interface"]["ip"]
+                host_inventory = inventory[host_data["inventory"]]
+                host_dict=dict(name=host,description=host_ip,enabled=True)
+                host_id=0
+                print(f'{host_dict} {host_data}') 
+                
+                response,host_id=add_host(host_inventory,json.dumps(host_dict),json.dumps(host_data),awx,user,password)
+                if response!="400 Bad Request":
+                    print(f"Host added ID: {host_id}")
+                    hostfile.write(f'{host_ip} {host}\n')
+                elif host_id!=0:
+                    print(f"Host exists ID: {host_id} ")
+                    hostfile.write(f'{host_ip} {host}\n')
+                else:
+                    print(f"Error adding host: {response}")
+                print('---------------------------')
         #
         # Grab build project file (should only be one)
         # This may require a change cli commands to create folder structure in AWX (researching)
         # 
+        hostfile.close()
         build_file=get_yaml_files(project_folder,'build')
         print(f"Build file: {build_file} {directory}")
         job_name=f"name: {directory}-build"
@@ -115,7 +120,7 @@ ask_verbosity_on_launch: false
         extra_vars='{"vars": {"temp_dir": "/var/tmp", "build_dir": "/var/tmp/build", "log": "/var/tmp/build/log"}}'
 
         job_template_data = job_name+'\n'+playbook_file+job_template_data
-        response,job_template_id=add_job_template(project_id,invid,json.dumps(yaml.safe_load(job_template_data)),json.dumps(yaml.safe_load(extra_vars)),awx,user,password)
+        response,job_template_id=add_job_template(project_id,inv_id,ee_id,json.dumps(yaml.safe_load(job_template_data)),json.dumps(yaml.safe_load(extra_vars)),awx,user,password)
         print(f"Job Template ID: {job_template_id}")
 
             
