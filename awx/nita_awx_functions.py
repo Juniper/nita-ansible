@@ -91,13 +91,21 @@ def get_inventory (inventory_name,awx=awx,user=user,password=password):
       return dict,dict['id'],dict['description'],dict['organization']  
   return dictInventory,0,"",0   
 
+def get_inv_group (group_name,inventory_id,awx=awx,user=user,password=password):
+  groups = get_awx(f"/api/v2/inventories/{inventory_id}/groups/",awx,user,password)
+  groupsInv = json.loads(groups.text)
+  for group in groupsInv['results']:
+    if group['name'] == group_name:
+      return group['id']
+  return 0
+
 def get_host (host_name,inventory_id,awx=awx,user=user,password=password):
   hosts = get_awx(f"/api/v2/inventories/{inventory_id}/hosts/",awx,user,password)
-  hostsInv = json.loads(hosts.text)
-  for host in hostsInv['results']:
+  hosts_inv = json.loads(hosts.text)
+  for host in hosts_inv['results']:
     if host['name'] == host_name:
       return host,host['id']
-  return hostsInv,0
+  return hosts_inv,0
 
 def get_job_templates (orgid,awx=awx,user=user,password=password):
   jobs=get_awx(f"/api/v2/organizations/{orgid}/job_templates",awx,user,password)
@@ -182,6 +190,20 @@ def add_host (inventory_id, host_data, var_data,awx=awx,user=user,password=passw
     host,host_id=get_host(json.loads(host_data)['name'],inventory_id,awx,user,password)
   return response, host_id
 
+def add_host_to_group (host_id,group_id,awx=awx,user=user,password=password):
+  host_dict={}
+  host_dict['id']=host_id
+  final_group=json.dumps(host_dict)
+  response=post_awx(f"/api/v2/groups/{group_id}/hosts/",final_group,awx,user,password)
+  return response
+
+def add_child_to_group (child_id,group_id,awx=awx,user=user,password=password):
+  child_dict={}
+  child_dict['id']=child_id
+  final_group=json.dumps(child_dict)
+  response=post_awx(f"/api/v2/groups/{group_id}/children/",final_group,awx,user,password)
+  return response
+
 def add_inventory(orgid,invname,awx=awx,user=user,password=password):
   #Simple function to add Inventory to Project to awx 
   inventory_id = 0
@@ -194,11 +216,24 @@ def add_inventory(orgid,invname,awx=awx,user=user,password=password):
   print(inventory_dict)
   response=post_awx(f"/api/v2/inventories/",final_inventory,awx,user,password)
   if response != "400 Bad Request":
-     if response.status_code == 201:
+    if response.status_code == 201:
       inventory_id=json.loads(response.text)['id']
   else:
     inv,inventory_id,inv_desc,inv_org=get_inventory(invname,awx,user,password) 
   return response, inventory_id  
+
+def add_inv_group(group,description,inv_id,awx=awx,user=user,password=password):
+  group_id = 0
+  group_dict={}
+  group_dict['name']=group
+  group_dict['description']=description
+  response=post_awx(f"/api/v2/inventories/{inv_id}/groups/",json.dumps(group_dict),awx,user,password)
+  if response != "400 Bad Request":
+    if response.status_code == 201:
+      group_id=json.loads(response.text)['id']
+  else:
+    group_id=get_inv_group(group,inv_id,awx,user,password)
+  return response, group_id
 
 def add_org(orgname,description,ee_id,awx=awx,user=user,password=password):
   #Simple function to add Organization to awx 
