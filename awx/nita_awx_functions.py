@@ -66,7 +66,7 @@ def post_awx (sub_url, jsonData,awx=awx,user=user,password=password):
       #if response.status_code != 200:
       #  print(f"Server unavailable: {response.status_code} {response.text}")
       #  sys.exit()
-      print ("post: "+awx+sub_url)
+      #print ("post: "+awx+sub_url)
       response=requests.post(awx+sub_url,data=jsonData,auth=(user,password),headers=header)
       response.raise_for_status()
       
@@ -165,7 +165,6 @@ def add_ee (name, description, image,pull,awx=awx,user=user,password=password):
   ee_dict["image"]=image
   ee_dict["pull"]=pull
   final_ee=json.dumps(ee_dict)
-  print(final_ee)
   response=post_awx(f"/api/v2/execution_environments/",final_ee,awx,user,password)
   if response != "400 Bad Request":
     if response.status_code == 201:
@@ -213,7 +212,6 @@ def add_inventory(orgid,invname,awx=awx,user=user,password=password):
   inventory_dict['description']=invname
   inventory_dict['organization']=orgid
   final_inventory=json.dumps(inventory_dict)
-  print(inventory_dict)
   response=post_awx(f"/api/v2/inventories/",final_inventory,awx,user,password)
   if response != "400 Bad Request":
     if response.status_code == 201:
@@ -222,11 +220,13 @@ def add_inventory(orgid,invname,awx=awx,user=user,password=password):
     inv,inventory_id,inv_desc,inv_org=get_inventory(invname,awx,user,password) 
   return response, inventory_id  
 
-def add_inv_group(group,description,inv_id,awx=awx,user=user,password=password):
+def add_inv_group(group,description,inv_id,group_variables,awx=awx,user=user,password=password):
   group_id = 0
   group_dict={}
   group_dict['name']=group
   group_dict['description']=description
+  group_dict['variables']=group_variables
+  print(f"Group Function: {json.dumps(group_dict)}")
   response=post_awx(f"/api/v2/inventories/{inv_id}/groups/",json.dumps(group_dict),awx,user,password)
   if response != "400 Bad Request":
     if response.status_code == 201:
@@ -234,6 +234,13 @@ def add_inv_group(group,description,inv_id,awx=awx,user=user,password=password):
   else:
     group_id=get_inv_group(group,inv_id,awx,user,password)
   return response, group_id
+
+def add_inv_variables(inv_id,inv_variables,awx=awx,user=user,password=password):
+  inv_dict={}
+  inv_dict['variables']=inv_variables
+  response=patch_awx(f"/api/v2/inventories/{inv_id}",json.dumps(inv_dict),awx,user,password)
+  print(f"Inventory Patch Function: {response.text} {json.dumps(inv_dict)}")
+  return response
 
 def add_org(orgname,description,ee_id,awx=awx,user=user,password=password):
   #Simple function to add Organization to awx 
@@ -243,7 +250,6 @@ def add_org(orgname,description,ee_id,awx=awx,user=user,password=password):
   org_dict['description']=description
   org_dict['default_environment']=ee_id
   final_org=json.dumps(org_dict)
-  print(final_org)
   response=post_awx("/api/v2/organizations/",final_org,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
@@ -261,7 +267,6 @@ def add_project(projname,description,org_id,ee_id,playbook_dir,awx=awx,user=user
   proj_dict['default_environment']=ee_id
   proj_dict['local_path']=playbook_dir
   final_proj=json.dumps(proj_dict)
-  print(final_proj)
   response=post_awx(f"/api/v2/organizations/{org_id}/projects/",final_proj,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
@@ -280,7 +285,6 @@ def add_job_template (project_id,inv_id,ee_id,job,extra_vars="",awx=awx,user=use
   job_dict["extra_vars"]=extra_vars
   job_dict["execution_environment"]=ee_id
   final_job=json.dumps(job_dict)
-  print(final_job)
   response=post_awx(f"/api/v2/job_templates/",final_job,awx,user,password)
   if response != "400 Bad Request":
      if response.status_code == 201:
