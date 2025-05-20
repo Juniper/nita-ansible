@@ -2,10 +2,15 @@
 
 This is being used to test the AWX execution environment. AWX requires kubernetes.
 
-## Folders
+## Folders and Files
 
 <b>ansible-ee</b> - setup files to build ansible execution environment based on https://github.com/juniper/nita-ansible container.
 
+<b>nita_awx_functions.py</b> - Front end function calls to add/update elements inside of AWX. Used by nita_file_import.py.
+
+<b>nita_file_import.py</b> - Recursively traverses folders in a folder called ``nita_project`` in the AWX host OS working directory (assumes /data/projects) and creates NITA project and uploads host information to AWX.
+
+Other files are used to install AWX.
 
 ## Installation
 
@@ -32,47 +37,51 @@ kubectl -n awx get secret  awx-admin-password -o jsonpath="{.data.password}" | b
 
 See [ansible-ee/README.md](/ansible-ee/README.md)  for details.
 
-## Coming Soon
+## To-Do
 
-NITA has been ported to k8s so we can being integration work with AWX.  
+1. Continue debugging effort for NITA Project Import
+2. Integrate with NITA Webapp
+3. Debug template/playbooks (some playbooks that call shell scripts seem to be problematic)  
 
 
 ## AWX Screenshots
 
 How the NITA example data is being loaded into AWX for testing.
 
-### Template
-<img width="1526" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/5820f15e-a9ff-44c9-b48b-d209b5ca6923">
+### Organization
+<img width="1896" alt="image" src="https://github.com/user-attachments/assets/afc18676-edf0-4df0-9825-40e65adff6c1" />
 
+### Execution Environment
+<img width="1883" alt="image" src="https://github.com/user-attachments/assets/80b1a0c2-73c9-4d49-9a0e-9fc0917e81e4" />
 
 ### Project
-
-<img width="1505" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/de5572ab-6707-415a-94e0-f9d8765dee99">
+<img width="1893" alt="image" src="https://github.com/user-attachments/assets/89d1eab7-5a5f-47cf-92d5-2156b1939c4d" />
 
 ### Template
-
-<img width="1950" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/262a6242-8128-491d-86e2-70d82391b49e">
-
+<img width="1892" alt="image" src="https://github.com/user-attachments/assets/7e3d7221-df7c-428e-9268-cd2436d21ba4" />
 
 ### Inventories
+<img width="1875" alt="image" src="https://github.com/user-attachments/assets/e31e9741-4793-438a-b642-a158754cbb92" />
 
-Note the variable data from ``groups_vars``. Also AWX requires an additional variable definition here ``ansible_python_interpreter: "{{ ansible_playbook_python }}"`` otherwise it will toss a missing module error because it runs the wrong python environment. See [this](https://www.reddit.com/r/ansible/comments/rb80pv/execution_environments_and_pip_module_locations/) thread. 
+Inventories are named based on the project folder name under the ``nita_project`` folder.
 
-<img width="1269" alt="image" src="https://github.com/wildsubnet/nita-awx/assets/6110061/958f3a4e-c262-4c8d-b92a-b1d56ea40204">
+<img width="1889" alt="image" src="https://github.com/user-attachments/assets/7ac57d34-b3a1-4d7b-82cb-1dfd65d3f21e" />
 
-Hosts also need to be put in a logically equivalent group based on the ansible playbook. So for the NITA example, create a group called ``routers``
+Note the variable data under the inventory. This is imported from ``all.yaml`` in ``group_vars`` folder in the project folder. AWX doesn't allow the creation of an explicity all group as it is already implicitly defined so the related variable data is stored at the inventory level. Also AWX requires an additional variable definition here ``ansible_python_interpreter: "{{ ansible_playbook_python }}"`` otherwise it will toss a missing module error because it runs the wrong python environment. See [this](https://www.reddit.com/r/ansible/comments/rb80pv/execution_environments_and_pip_module_locations/) thread. 
 
-<img width="1963" alt="image" src="https://github.com/wildsubnet/nita-ansible/assets/6110061/405ba267-aa2d-42e7-9900-cb0824bfb963">
+Groups are created and populated with host information if defined in the project folder ``hosts`` file.
+
+<img width="1888" alt="image" src="https://github.com/user-attachments/assets/af5f160a-65b9-44f2-a0cf-b501ce1549f5" />
+
+<img width="1594" alt="image" src="https://github.com/user-attachments/assets/5b55d8cb-73c1-4d0a-a059-d51b2314a523" />
 
 ### Hosts
+<img width="1876" alt="image" src="https://github.com/user-attachments/assets/926a78bc-ffd9-4feb-a750-df4412dc03b5" />
 
-Under hosts create individual hosts (note the variable information per host).  Currently demo doesn't have name resolution working so the name field has specific IPs. If name resolution is setup the resolvable name can be used or add the ansible_host variable (shown below).
+<img width="1881" alt="image" src="https://github.com/user-attachments/assets/352e4a04-45be-474c-b26c-57fd616839cd" />
 
-<img width="1889" alt="image" src="https://github.com/user-attachments/assets/b258ac34-6f7a-4a13-b57f-f96ded67dd26">
-
-Details page. Under the groups tab you will add the host to the relevant playbook group.
-
-<img width="1894" alt="image" src="https://github.com/user-attachments/assets/604b8fe7-ffa9-476c-8e0a-0d12f38d2dad">
+### Templates
+<img width="1887" alt="image" src="https://github.com/user-attachments/assets/d162b05b-fe19-4d45-8df0-dadad328c0a7" />
 
 
 
