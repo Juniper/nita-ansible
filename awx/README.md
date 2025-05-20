@@ -67,7 +67,9 @@ Inventories are named based on the project folder name under the ``nita_project`
 
 <img width="1889" alt="image" src="https://github.com/user-attachments/assets/7ac57d34-b3a1-4d7b-82cb-1dfd65d3f21e" />
 
-Note the variable data under the inventory. This is imported from ``all.yaml`` in ``group_vars`` folder in the project folder. AWX doesn't allow the creation of an explicity all group as it is already implicitly defined so the related variable data is stored at the inventory level. Also AWX requires an additional variable definition here ``ansible_python_interpreter: "{{ ansible_playbook_python }}"`` otherwise it will toss a missing module error because it runs the wrong python environment. See [this](https://www.reddit.com/r/ansible/comments/rb80pv/execution_environments_and_pip_module_locations/) thread. 
+Note the variable data under the inventory. This is imported from ``all.yaml`` in ``group_vars`` folder in the project folder. AWX doesn't allow the creation of an explicity all group as it is already implicitly defined so the related variable data is stored at the inventory level. 
+
+In certain cases AWX may require an additional variable definition here ``ansible_python_interpreter: "{{ ansible_playbook_python }}"`` otherwise it will toss a missing module error because it runs the wrong python environment. See [this](https://www.reddit.com/r/ansible/comments/rb80pv/execution_environments_and_pip_module_locations/) thread. 
 
 Groups are created and populated with host information if defined in the project folder ``hosts`` file.
 
@@ -82,6 +84,10 @@ Groups are created and populated with host information if defined in the project
 
 ### Templates
 <img width="1887" alt="image" src="https://github.com/user-attachments/assets/d162b05b-fe19-4d45-8df0-dadad328c0a7" />
+
+### Executed Job
+<img width="1876" alt="image" src="https://github.com/user-attachments/assets/d132c19e-544e-4577-ab40-40fe7a52bf79" />
+
 
 
 
