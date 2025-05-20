@@ -176,6 +176,7 @@ def add_ee (name, description, image,pull,awx=awx,user=user,password=password):
 
 def add_host (inventory_id, host_data, var_data,awx=awx,user=user,password=password):
   #Simple function to add a host to awx inventory 
+  #print(f">>>>Add Host Function: {inventory_id} {host_data}")
   host_id = 0
   response=post_awx(f"/api/v2/inventories/{inventory_id}/hosts/",host_data,awx,user,password)
   if response != "400 Bad Request":
@@ -186,7 +187,7 @@ def add_host (inventory_id, host_data, var_data,awx=awx,user=user,password=passw
     #
     # get_host returns host struct and host_id...only need ID
     #
-    host,host_id=get_host(json.loads(host_data)['name'],inventory_id,awx,user,password)
+    response,host_id=get_host(json.loads(host_data)['name'],inventory_id,awx,user,password)
   return response, host_id
 
 def add_host_to_group (host_id,group_id,awx=awx,user=user,password=password):
@@ -226,7 +227,7 @@ def add_inv_group(group,description,inv_id,group_variables,awx=awx,user=user,pas
   group_dict['name']=group
   group_dict['description']=description
   group_dict['variables']=group_variables
-  print(f"Group Function: {json.dumps(group_dict)}")
+  #print(f"Group Function: {json.dumps(group_dict)}")
   response=post_awx(f"/api/v2/inventories/{inv_id}/groups/",json.dumps(group_dict),awx,user,password)
   if response != "400 Bad Request":
     if response.status_code == 201:
@@ -239,7 +240,7 @@ def add_inv_variables(inv_id,inv_variables,awx=awx,user=user,password=password):
   inv_dict={}
   inv_dict['variables']=inv_variables
   response=patch_awx(f"/api/v2/inventories/{inv_id}",json.dumps(inv_dict),awx,user,password)
-  print(f"Inventory Patch Function: {response.text} {json.dumps(inv_dict)}")
+  #print(f"Inventory Patch Function: {response.text} {json.dumps(inv_dict)}")
   return response
 
 def add_org(orgname,description,ee_id,awx=awx,user=user,password=password):

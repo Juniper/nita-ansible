@@ -10,8 +10,6 @@ from pathlib import Path
 
 from nita_awx_functions import *
 
-#from nita_import import *
-#pe3_data_json=json.dumps(yaml.safe_load(pe3_data))
 
 def get_yaml_files(project_folder,subfolder):
     # Construct the path pattern for YAML files in host_vars
@@ -73,12 +71,13 @@ if __name__ == "__main__":
 
     directories = list_directories(proj_folder)
     print(f"Searching directories in NITA Project Folder {proj_folder}: {directories}")
-    hosts={}
     inventory={}
     for directory in directories:
         #
         # Add directory as new inventory to use in add host
         #
+        hosts={}
+        print(f"Processing directory: {directory}")
         response,inv_id = add_inventory(org_id,directory,awx,user,password)
         if inv_id != 0:
             inventory[directory]=inv_id
@@ -91,6 +90,7 @@ if __name__ == "__main__":
         group_files=get_yaml_files(project_folder,'group_vars')
         print(f"Processing Host files in {project_folder}:")
         for yaml_file in host_files:
+
             with open(yaml_file, 'r') as file:
                 content = file.read()
                 host_json=json.loads(json.dumps(yaml.safe_load(content)))
@@ -102,6 +102,7 @@ if __name__ == "__main__":
                     host_json["ansible_host"]=host_json["management_interface"]["ip"]
                     hosts[host_name]=host_json 
         with open ('hosts.txt', 'w',encoding='utf-8') as hostfile:
+            print(f"Host file: {yaml_file} {host_json}")
             for index,(host,host_data) in enumerate(hosts.items()):
                 host_ip = host_data["management_interface"]["ip"]
                 host_inventory = inventory[host_data["inventory"]]
@@ -191,7 +192,7 @@ ask_verbosity_on_launch: false
                     # Add hosts to group
                     #
                     for grhost in grhosts:
-                        print(f"Adding hosts to {group_name}")
+                        print(f"Adding {grhost} to {group_name}")
                         response, host_id = get_host(grhost,inv_id,awx,user,password)
                         #print(f"{grhost} host_id: {host_id} group_id: {group_id}")
                         if host_id != 0:                        
