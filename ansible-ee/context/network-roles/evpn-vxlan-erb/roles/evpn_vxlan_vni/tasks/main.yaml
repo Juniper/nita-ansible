@@ -1,0 +1,4 @@
+---
+- name: Configure VNIs + IRBs
+  template: src="evpn_vni.j2" dest="{{ tmp_dir }}/evpn_vni.cfg"
+  when: leaf_type != "border"

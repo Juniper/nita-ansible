@@ -1,0 +1,3 @@
+---
+- name: Configure routing policies
+  template: src="evpn_policy.j2" dest="{{ tmp_dir }}/evpn_policy.cfg"

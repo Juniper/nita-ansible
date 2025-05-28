@@ -1,0 +1,37 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: awx-projects-volume
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: awx-projects-pv
+spec:
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: 1Gi
+  storageClassName: awx-projects-volume
+  hostPath:
+    path: /data/projects
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  finalizers:
+  - kubernetes.io/pvc-protection
+  labels:
+    app.kubernetes.io/managed-by: awx-operator
+  name: awx-projects-claim
+spec:
+  storageClassName: awx-projects-volume
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

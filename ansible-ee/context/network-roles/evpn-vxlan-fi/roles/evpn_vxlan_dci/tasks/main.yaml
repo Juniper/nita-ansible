@@ -1,0 +1,3 @@
+---
+- name: Configure DCI eBGP
+  template: src="evpn_vxlan_dci.j2" dest="{{ tmp_dir }}/evpn_vxlan_dci.cfg"

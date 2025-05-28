@@ -1,4 +1,4 @@
-python38-devel [platform:rpm compile]
+python3-devel [platform:rpm]
 subversion [platform:rpm]
 subversion [platform:dpkg]
 git-lfs [platform:rpm]

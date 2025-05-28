@@ -1,0 +1,69 @@
+#jinja2:lstrip_blocks: True
+## ********************************************************
+##
+## Project: nita-ansible
+##
+## Copyright (c) Juniper Networks, Inc., 2021. All rights reserved.
+##
+## Notice and Disclaimer: This code is licensed to you under the Apache 2.0 License (the "License"). You may not use this code except in compliance with the License. This code is not an official Juniper product. You can obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0.html
+##
+## SPDX-License-Identifier: Apache-2.0
+##
+## Third-Party Code: This code may depend on other components under separate copyright notice and license terms. Your use of the source code for those components is subject to the terms and conditions of the respective license as noted in the Third-Party source code file.
+##
+## ********************************************************
+system {
+    host-name {{ inventory_hostname }};
+    root-authentication {
+        encrypted-password "{{ password_hashes.root_user }}"; # SECRET-DATA
+    }
+    services {
+        ssh {
+            root-login allow;
+        }
+        netconf {
+            ssh;
+        }
+        rest {
+            http {
+                port 3000;
+            }
+            enable-explorer;
+        }
+    }
+    login {
+        message "{{ login_message }}";
+        user jcluser {
+            class super-user;
+            uid 2000;
+            authentication {
+                encrypted-password "{{ password_hashes.netadmin_user }}";
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any any;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+    {% if ntp_server is defined %}
+    ntp {
+	server {{ ntp_server }};
+    }
+    {% endif %}
+    {% if time_zone is defined %}
+    time-zone {{ time_zone }};
+    {% endif %}
+}
