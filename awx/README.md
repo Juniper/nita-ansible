@@ -16,7 +16,7 @@ Other files are used to install AWX.
 
 1. Install Kubernetes. The build script assumes kubernetes is already installed. 
 
-2. Install AWX using the provided script as show below. This does a few things in addition to pulling a specific version of AWX. The script creates a namespace in k8s called ```awx```. It also creates the pods required to run AWX and spins up a service running on default ports for AWX. 
+2. Install AWX using the provided script as show below. This does a few things in addition to pulling a specific version of AWX. The script creates a namespace in k8s called ```awx```. It also creates the pods required to run AWX and spins up a service running on default ports for AWX. AWX installation takes quite awhile and the script utilizes the ```watch``` command which may need to be installed prior to executing.
 
 ```
 cd nita-ansible
@@ -41,7 +41,7 @@ See [ansible-ee/README.md](/ansible-ee/README.md)  for details.
 
 1. Continue debugging effort for NITA Project Import
 2. Integrate with NITA Webapp
-3. Debug template/playbooks (some playbooks that call shell scripts seem to be problematic)  
+3. Debug template/playbooks (some playbooks that call shell scripts seem to be problematic including "make_etc_hosts.sh" in the example NITA projects)  
 
 
 ## AWX Screenshots
