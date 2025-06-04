@@ -1,9 +1,9 @@
-ARG EE_BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
+ARG EE_BASE_IMAGE="quay.io/almalinuxorg/almalinux:10"
 ARG PYCMD="/usr/bin/python3"
 ARG PKGMGR_PRESERVE_CACHE=""
 ARG ANSIBLE_GALAXY_CLI_COLLECTION_OPTS="--pre -vvv"
 ARG ANSIBLE_GALAXY_CLI_ROLE_OPTS=""
-ARG ANSIBLE_INSTALL_REFS="ansible-core==2.14.4 ansible-runner"
+ARG ANSIBLE_INSTALL_REFS="ansible-core ansible-runner"
 ARG PKGMGR="/usr/bin/dnf"
 
 # Base build stage
@@ -90,7 +90,9 @@ RUN cd network-roles/evpn-vxlan-hb && bash install.sh
 RUN cd network-roles/evpn-vxlan-sb && bash install.sh
 COPY network-roles/mx_common/ /etc/ansible/roles/mx_common
 RUN mkdir -p /var/nita_configs
+RUN chmod 777 /var/nita_configs
 RUN mkdir -p /var/tmp/build
+RUN chmod -R 777 /var/tmp
 RUN rm -rf /output
 LABEL ansible-execution-environment=true
 USER 1000

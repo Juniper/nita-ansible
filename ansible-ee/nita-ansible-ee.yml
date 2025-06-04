@@ -4,7 +4,7 @@ build_arg_defaults:
   ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "--pre -vvv"
 dependencies:
   ansible_core:
-    package_pip: ansible-core==2.14.4
+    package_pip: ansible-core
   ansible_runner:
     package_pip: ansible-runner
   galaxy: requirements.yml
@@ -13,7 +13,8 @@ dependencies:
 
 images:
   base_image:
-    name: quay.io/almalinux/almalinux:9 
+    name: quay.io/almalinuxorg/almalinux:10
+    #name: quay.io/almalinuxorg/almalinux:9.6
     #name: quay.io/rockylinux/rockylinux:9 
     # Other available base images:
     #   - quay.io/rockylinux/rockylinux:9
