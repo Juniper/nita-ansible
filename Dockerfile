@@ -12,7 +12,7 @@
 #
 # ********************************************************
 
-FROM alpine:3.17.3
+FROM alpine:3.22.0
 
 # ==> Specify Python requirements filename;   default = "requirements.txt"
 # ==> Specify Ansible requirements filename;  default = "requirements.yml"
@@ -33,7 +33,7 @@ RUN apk add --no-cache sudo \
 # copy requirements.txt for Python and install
 WORKDIR /tmp
 COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip3 install --break-system-packages -r requirements.txt
 
 #RUN ansible-galaxy install Juniper.junos -p /etc/ansible/roles/
 COPY requirements.yml .
