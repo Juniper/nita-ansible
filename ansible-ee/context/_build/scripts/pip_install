@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2023 Red Hat, Inc.
+# Copyright (c) 2024 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,31 +15,39 @@
 # limitations under the License.
 
 #####################################################################
-# Script to validate that Ansible Galaxy is installed on the system.
+# Script to encapsulate pip installation.
+#
+# Usage: pip_install <PYCMD>
+#
+# Options:
+#     PYCMD - The path to the python executable to use.
 #####################################################################
 
 set -x
 
-ansible-galaxy --version
+PYCMD=$1
+
+if [ -z "$PYCMD" ]
+then
+    echo "Usage: pip_install <PYCMD>"
+    exit 1
+fi
+
+if [ ! -x "$PYCMD" ]
+then
+    echo "$PYCMD is not an executable"
+    exit 1
+fi
+
+# This is going to be our default functionality for now. This will likely
+# need to change if we add support for non-RHEL distros.
+$PYCMD -m ensurepip --root /
 
 if [ $? -ne 0 ]
 then
     cat<<EOF
 **********************************************************************
-ERROR - 'ansible-galaxy' command not functioning as expected
-
-  There was an error running the 'ansible-galaxy' command. Some
-  possible causes are 'ansible-core' missing from the base image, an
-  incorrect 'ansible.cfg', or 'ansible-galaxy' not being available to
-  the selected Python interpreter. Please use the -vvv option to
-  examine the build output for any errors.
-
-  Ansible must be installed in the base image. If you are using a
-  recent enough version of the execution environment file, you may
-  use the 'dependencies.ansible_core' configuration option to install
-  Ansible for you, or use 'additional_build_steps' to manually do
-  this yourself. Alternatively, use a base image with Ansible already
-  installed.
+ERROR - pip installation failed for Python $PYCMD
 **********************************************************************
 EOF
     exit 1

@@ -12,7 +12,8 @@
 #
 # ********************************************************
 
-FROM alpine:3.23.3 AS builder
+#FROM alpine:3.23.3 AS builder
+FROM alpine:3 AS builder
 
 RUN apk add --no-cache \
     python3 py3-pip py3-virtualenv \
@@ -68,4 +69,4 @@ VOLUME /project
 LABEL net.juniper.framework="NITA"
 
 WORKDIR /root
-CMD bash
+CMD ["bash"]
