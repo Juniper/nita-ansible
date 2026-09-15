@@ -33,6 +33,8 @@ jobs:
           --tag "juniper/nita-ansible-ee:${VERSION}" \
           --container-runtime docker \
           -f nita-ansible-ee.yml
+        docker run --rm "juniper/nita-ansible-ee:${VERSION}" \
+          python3 -c 'import jnpr.junos, jxmlease, pynetbox, yaml'
 
     - name: Log in to GitHub Container Registry
       if: github.event_name == 'push'
