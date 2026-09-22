@@ -24,7 +24,8 @@ WORKDIR /tmp
 COPY requirements.txt requirements.txt
 RUN python3 -m venv /opt/venv \
  && /opt/venv/bin/pip install --upgrade pip setuptools wheel \
- && /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+ && /opt/venv/bin/pip install --no-cache-dir -r requirements.txt \
+ && /opt/venv/bin/python -c "import jnpr.junos"
 
 COPY requirements.yml requirements.yml
 RUN ansible-galaxy collection install -r requirements.yml
@@ -61,6 +62,7 @@ COPY --from=builder /root/.ansible /root/.ansible
 COPY --from=builder /etc/ansible/roles /etc/ansible/roles
 
 ENV PATH="/opt/venv/bin:$PATH"
+ENV VIRTUAL_ENV="/opt/venv"
 
 WORKDIR /project
 VOLUME /project
@@ -68,4 +70,4 @@ VOLUME /project
 LABEL net.juniper.framework="NITA"
 
 WORKDIR /root
-CMD bash
+CMD ["bash"]

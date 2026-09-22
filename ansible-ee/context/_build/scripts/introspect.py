@@ -1,15 +1,92 @@
+from __future__ import annotations
+
 import argparse
 import logging
 import os
+import re
 import sys
 import yaml
 
-import requirements
-import importlib.metadata
+from packaging.requirements import InvalidRequirement, Requirement
 
-base_collections_path = '/usr/share/ansible/collections'
-default_file = 'execution-environment.yml'
+
+BASE_COLLECTIONS_PATH = '/usr/share/ansible/collections'
+
+
+# regex for a comment at the start of a line, or embedded with leading space(s)
+COMMENT_RE = re.compile(r'(?:^|\s+)#.*$')
+
+
+EXCLUDE_REQUIREMENTS = frozenset((
+    # obviously already satisfied or unwanted
+    'ansible', 'ansible-base', 'python', 'ansible-core',
+    # general python test requirements
+    'tox', 'pycodestyle', 'yamllint', 'pylint',
+    'flake8', 'pytest', 'pytest-xdist', 'coverage', 'mock', 'testinfra',
+    # test requirements highly specific to Ansible testing
+    'ansible-lint', 'molecule', 'galaxy-importer', 'voluptuous',
+    # already present in image for py3 environments
+    'yaml', 'pyyaml', 'json',
+))
+
+
 logger = logging.getLogger(__name__)
+
+
+class CollectionDefinition:
+    """
+    This class represents the dependency metadata for a collection
+    should be replaced by logic to hit the Galaxy API if made available
+    """
+
+    def __init__(self, collection_path):
+        self.reference_path = collection_path
+
+        # NOTE: Filenames should match constants.DEAFULT_EE_BASENAME and constants.YAML_FILENAME_EXTENSIONS.
+        meta_file_base = os.path.join(collection_path, 'meta', 'execution-environment')
+        ee_exists = False
+        for ext in ('yml', 'yaml'):
+            meta_file = f"{meta_file_base}.{ext}"
+            if os.path.exists(meta_file):
+                with open(meta_file, 'r') as f:
+                    self.raw = yaml.safe_load(f)
+                ee_exists = True
+                break
+
+        if not ee_exists:
+            self.raw = {'version': 1, 'dependencies': {}}
+            # Automatically infer requirements for collection
+            for entry, filename in [('python', 'requirements.txt'), ('system', 'bindep.txt')]:
+                candidate_file = os.path.join(collection_path, filename)
+                if has_content(candidate_file):
+                    self.raw['dependencies'][entry] = filename
+
+    def target_dir(self):
+        namespace, name = self.namespace_name()
+        return os.path.join(
+            BASE_COLLECTIONS_PATH, 'ansible_collections',
+            namespace, name
+        )
+
+    def namespace_name(self):
+        "Returns 2-tuple of namespace and name"
+        path_parts = [p for p in self.reference_path.split(os.path.sep) if p]
+        return tuple(path_parts[-2:])
+
+    def get_dependency(self, entry):
+        """A collection is only allowed to reference a file by a relative path
+        which is relative to the collection root
+        """
+        req_file = self.raw.get('dependencies', {}).get(entry)
+        if req_file is None:
+            return None
+        if os.path.isabs(req_file):
+            raise RuntimeError(
+                'Collections must specify relative paths for requirements files. '
+                f'The file {req_file} specified by {self.reference_path} violates this.'
+            )
+
+        return req_file
 
 
 def line_is_empty(line):
@@ -19,7 +96,7 @@ def line_is_empty(line):
 def read_req_file(path):
     """Provide some minimal error and display handling for file reading"""
     if not os.path.exists(path):
-        print('Expected requirements file not present at: {0}'.format(os.path.abspath(path)))
+        print(f'Expected requirements file not present at: {os.path.abspath(path)}')
     with open(path, 'r') as f:
         return f.read()
 
@@ -60,14 +137,14 @@ def process_collection(path):
 
     :param str path: root directory of collection (this would contain galaxy.yml file)
     """
-    CD = CollectionDefinition(path)
+    col_def = CollectionDefinition(path)
 
-    py_file = CD.get_dependency('python')
+    py_file = col_def.get_dependency('python')
     pip_lines = []
     if py_file:
         pip_lines = pip_file_data(os.path.join(path, py_file))
 
-    sys_file = CD.get_dependency('system')
+    sys_file = col_def.get_dependency('system')
     bindep_lines = []
     if sys_file:
         bindep_lines = bindep_file_data(os.path.join(path, sys_file))
@@ -75,7 +152,36 @@ def process_collection(path):
     return (pip_lines, bindep_lines)
 
 
-def process(data_dir=base_collections_path, user_pip=None, user_bindep=None):
+def process(data_dir=BASE_COLLECTIONS_PATH,
+            user_pip=None,
+            user_bindep=None,
+            exclude_pip=None,
+            exclude_bindep=None,
+            exclude_collections=None):
+    """
+    Build a dictionary of Python and system requirements from any collections
+    installed in data_dir, and any user specified requirements.
+
+    Excluded requirements, if any, will be inserted into the return dict.
+
+    Example return dict:
+       {
+          'python': {
+              'collection.a': ['abc', 'def'],
+              'collection.b': ['ghi'],
+              'user': ['jkl'],
+              'exclude: ['abc'],
+          },
+          'system': {
+              'collection.a': ['ZYX'],
+              'user': ['WVU'],
+              'exclude': ['ZYX'],
+          },
+          'excluded_collections': [
+              'a.b',
+          ]
+       }
+    """
     paths = []
     path_root = os.path.join(data_dir, 'ansible_collections')
 
@@ -97,9 +203,9 @@ def process(data_dir=base_collections_path, user_pip=None, user_bindep=None):
     sys_req = {}
     for path in paths:
         col_pip_lines, col_sys_lines = process_collection(path)
-        CD = CollectionDefinition(path)
-        namespace, name = CD.namespace_name()
-        key = '{}.{}'.format(namespace, name)
+        col_def = CollectionDefinition(path)
+        namespace, name = col_def.namespace_name()
+        key = f'{namespace}.{name}'
 
         if col_pip_lines:
             py_req[key] = col_pip_lines
@@ -112,15 +218,32 @@ def process(data_dir=base_collections_path, user_pip=None, user_bindep=None):
         col_pip_lines = pip_file_data(user_pip)
         if col_pip_lines:
             py_req['user'] = col_pip_lines
+    if exclude_pip:
+        col_pip_exclude_lines = pip_file_data(exclude_pip)
+        if col_pip_exclude_lines:
+            py_req['exclude'] = col_pip_exclude_lines
     if user_bindep:
         col_sys_lines = bindep_file_data(user_bindep)
         if col_sys_lines:
             sys_req['user'] = col_sys_lines
+    if exclude_bindep:
+        col_sys_exclude_lines = bindep_file_data(exclude_bindep)
+        if col_sys_exclude_lines:
+            sys_req['exclude'] = col_sys_exclude_lines
 
-    return {
+    retval = {
         'python': py_req,
-        'system': sys_req
+        'system': sys_req,
     }
+
+    if exclude_collections:
+        # This file should just be a newline separated list of collection names,
+        # so reusing bindep_file_data() to read it should work fine.
+        excluded_collection_list = bindep_file_data(exclude_collections)
+        if excluded_collection_list:
+            retval['excluded_collections'] = excluded_collection_list
+
+    return retval
 
 
 def has_content(candidate_file):
@@ -135,77 +258,114 @@ def has_content(candidate_file):
     return bool(content.strip().strip('\n'))
 
 
-class CollectionDefinition:
-    """This class represents the dependency metadata for a collection
-    should be replaced by logic to hit the Galaxy API if made available
+def strip_comments(reqs: dict[str, list]) -> dict[str, list]:
     """
+    Filter any comments out of the Python collection requirements input.
 
-    def __init__(self, collection_path):
-        self.reference_path = collection_path
-        meta_file = os.path.join(collection_path, 'meta', default_file)
-        if os.path.exists(meta_file):
-            with open(meta_file, 'r') as f:
-                self.raw = yaml.safe_load(f)
-        else:
-            self.raw = {'version': 1, 'dependencies': {}}
-            # Automatically infer requirements for collection
-            for entry, filename in [('python', 'requirements.txt'), ('system', 'bindep.txt')]:
-                candidate_file = os.path.join(collection_path, filename)
-                if has_content(candidate_file):
-                    self.raw['dependencies'][entry] = filename
+    :param dict reqs: A dict of Python requirements, keyed by collection name.
 
-    def target_dir(self):
-        namespace, name = self.namespace_name()
-        return os.path.join(
-            base_collections_path, 'ansible_collections',
-            namespace, name
-        )
-
-    def namespace_name(self):
-        "Returns 2-tuple of namespace and name"
-        path_parts = [p for p in self.reference_path.split(os.path.sep) if p]
-        return tuple(path_parts[-2:])
-
-    def get_dependency(self, entry):
-        """A collection is only allowed to reference a file by a relative path
-        which is relative to the collection root
-        """
-        req_file = self.raw.get('dependencies', {}).get(entry)
-        if req_file is None:
-            return None
-        elif os.path.isabs(req_file):
-            raise RuntimeError(
-                'Collections must specify relative paths for requirements files. '
-                'The file {0} specified by {1} violates this.'.format(
-                    req_file, self.reference_path
-                )
-            )
-
-        return req_file
-
-
-def simple_combine(reqs):
-    """Given a dictionary of requirement lines keyed off collections,
-    return a list with the most basic of de-duplication logic,
-    and comments indicating the sources based off the collection keys
+    :return: Same as the input parameter, except with no comment lines.
     """
-    consolidated = []
-    fancy_lines = []
+    result: dict[str, list] = {}
     for collection, lines in reqs.items():
         for line in lines:
-            if line_is_empty(line):
-                continue
+            # strip comments
+            if (base_line := COMMENT_RE.sub('', line.strip())):
+                result.setdefault(collection, []).append(base_line)
 
-            base_line = line.split('#')[0].strip()
-            if base_line in consolidated:
-                i = consolidated.index(base_line)
-                fancy_lines[i] += ', {}'.format(collection)
+    return result
+
+
+def should_be_excluded(value: str, exclusion_list: list[str]) -> bool:
+    """
+    Test if `value` matches against any value in `exclusion_list`.
+
+    The exclusion_list values are either strings to be compared in a case-insensitive
+    manner against value, OR, they are regular expressions to be tested against the
+    value. A regular expression will contain '~' as the first character.
+
+    :return: True if the value should be excluded, False otherwise.
+    """
+    for exclude_value in exclusion_list:
+        if exclude_value[0] == "~":
+            pattern = exclude_value[1:]
+            if re.fullmatch(pattern.lower(), value.lower()):
+                return True
+        elif exclude_value.lower() == value.lower():
+            return True
+    return False
+
+
+def filter_requirements(reqs: dict[str, list],
+                        exclude: list[str] | None = None,
+                        exclude_collections: list[str] | None = None,
+                        is_python: bool = True) -> list[str]:
+    """
+    Given a dictionary of Python requirement lines keyed off collections,
+    return a list of cleaned up (no source comments) requirements
+    annotated with comments indicating the sources based off the collection keys.
+
+    Currently, non-pep508 compliant Python entries are passed through. We also no
+    longer attempt to normalize names (replace '_' with '-', etc), other than
+    lowercasing it for exclusion matching, since we no longer are attempting
+    to combine similar entries.
+
+    :param dict reqs: A dict of either Python or system requirements, keyed by collection name.
+    :param list exclude: A list of requirements to be excluded from the output.
+    :param list exclude_collections: A list of collection names from which to exclude all requirements.
+    :param bool is_python: This should be set to True for Python requirements, as each
+        will be tested for PEP508 compliance. This should be set to False for system requirements.
+
+    :return: A list of filtered and annotated requirements.
+    """
+    exclusions: list[str] = []
+    collection_ignore_list: list[str] = []
+
+    if exclude:
+        exclusions = exclude.copy()
+    if exclude_collections:
+        collection_ignore_list = exclude_collections.copy()
+
+    annotated_lines: list[str] = []
+    uncommented_reqs = strip_comments(reqs)
+
+    for collection, lines in uncommented_reqs.items():
+        # Bypass this collection if we've been told to ignore all requirements from it.
+        if should_be_excluded(collection, collection_ignore_list):
+            logger.debug("# Excluding all requirements from collection '%s'", collection)
+            continue
+
+        for line in lines:
+            # Determine the simple name based on type of requirement
+            if is_python:
+                try:
+                    parsed_req = Requirement(line)
+                    name = parsed_req.name
+                except InvalidRequirement:
+                    logger.warning(
+                        "Passing through non-PEP508 compliant line '%s' from collection '%s'",
+                        line, collection
+                    )
+                    annotated_lines.append(line)  # We intentionally won't annotate these lines (multi-line?)
+                    continue
             else:
-                fancy_line = base_line + '  # from collection {}'.format(collection)
-                consolidated.append(base_line)
-                fancy_lines.append(fancy_line)
+                # bindep system requirements have the package name as the first "word" on the line
+                name = line.split(maxsplit=1)[0]
 
-    return fancy_lines
+            if collection.lower() not in {'user', 'exclude'}:
+                lower_name = name.lower()
+
+                if lower_name in EXCLUDE_REQUIREMENTS:
+                    logger.debug("# Excluding requirement '%s' from '%s'", name, collection)
+                    continue
+
+                if should_be_excluded(lower_name, exclusions):
+                    logger.debug("# Explicitly excluding requirement '%s' from '%s'", name, collection)
+                    continue
+
+            annotated_lines.append(f'{line}  # from collection {collection}')
+
+    return annotated_lines
 
 
 def parse_args(args=None):
@@ -228,26 +388,37 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
-def run_introspect(args, logger):
-    data = process(args.folder, user_pip=args.user_pip, user_bindep=args.user_bindep)
-    if args.sanitize:
-        logger.info('# Sanitized dependencies for %s', args.folder)
-        data_for_write = data
-        data['python'] = sanitize_requirements(data['python'])
-        data['system'] = simple_combine(data['system'])
-    else:
-        logger.info('# Dependency data for %s', args.folder)
-        data_for_write = data.copy()
-        data_for_write['python'] = simple_combine(data['python'])
-        data_for_write['system'] = simple_combine(data['system'])
+def run_introspect(args, log):
+    data = process(args.folder,
+                   user_pip=args.user_pip,
+                   user_bindep=args.user_bindep,
+                   exclude_pip=args.exclude_pip,
+                   exclude_bindep=args.exclude_bindep,
+                   exclude_collections=args.exclude_collections)
+    log.info('# Dependency data for %s', args.folder)
+
+    excluded_collections = data.pop('excluded_collections', None)
+
+    data['python'] = filter_requirements(
+        data['python'],
+        exclude=data['python'].pop('exclude', []),
+        exclude_collections=excluded_collections,
+    )
+
+    data['system'] = filter_requirements(
+        data['system'],
+        exclude=data['system'].pop('exclude', []),
+        exclude_collections=excluded_collections,
+        is_python=False
+    )
 
     print('---')
     print(yaml.dump(data, default_flow_style=False))
 
     if args.write_pip and data.get('python'):
-        write_file(args.write_pip, data_for_write.get('python') + [''])
+        write_file(args.write_pip, data.get('python') + [''])
     if args.write_bindep and data.get('system'):
-        write_file(args.write_bindep, data_for_write.get('system') + [''])
+        write_file(args.write_bindep, data.get('system') + [''])
 
     sys.exit(0)
 
@@ -263,20 +434,16 @@ def create_introspect_parser(parser):
         )
     )
     introspect_parser.add_argument('--sanitize', action='store_true',
-                                   help=('Sanitize and de-duplicate requirements. '
-                                         'This is normally done separately from the introspect script, but this '
-                                         'option is given to more accurately test collection content.'))
+                                   help=argparse.SUPPRESS)
 
     introspect_parser.add_argument(
-        'folder', default=base_collections_path, nargs='?',
+        'folder', default=BASE_COLLECTIONS_PATH, nargs='?',
         help=(
             'Ansible collections path(s) to introspect. '
             'This should have a folder named ansible_collections inside of it.'
         )
     )
-    # Combine user requirements and collection requirements into single file
-    # in the future, could look into passing multilple files to
-    # python-builder scripts to be fed multiple files as opposed to this
+
     introspect_parser.add_argument(
         '--user-pip', dest='user_pip',
         help='An additional file to combine with collection pip requirements.'
@@ -284,6 +451,18 @@ def create_introspect_parser(parser):
     introspect_parser.add_argument(
         '--user-bindep', dest='user_bindep',
         help='An additional file to combine with collection bindep requirements.'
+    )
+    introspect_parser.add_argument(
+        '--exclude-bindep-reqs', dest='exclude_bindep',
+        help='An additional file to exclude specific bindep requirements from collections.'
+    )
+    introspect_parser.add_argument(
+        '--exclude-pip-reqs', dest='exclude_pip',
+        help='An additional file to exclude specific pip requirements from collections.'
+    )
+    introspect_parser.add_argument(
+        '--exclude-collection-reqs', dest='exclude_collections',
+        help='An additional file to exclude all requirements from the listed collections.'
     )
     introspect_parser.add_argument(
         '--write-pip', dest='write_pip',
@@ -297,78 +476,6 @@ def create_introspect_parser(parser):
     return introspect_parser
 
 
-EXCLUDE_REQUIREMENTS = frozenset((
-    # obviously already satisfied or unwanted
-    'ansible', 'ansible-base', 'python', 'ansible-core',
-    # general python test requirements
-    'tox', 'pycodestyle', 'yamllint', 'pylint',
-    'flake8', 'pytest', 'pytest-xdist', 'coverage', 'mock', 'testinfra',
-    # test requirements highly specific to Ansible testing
-    'ansible-lint', 'molecule', 'galaxy-importer', 'voluptuous',
-    # already present in image for py3 environments
-    'yaml', 'pyyaml', 'json',
-))
-
-
-def sanitize_requirements(collection_py_reqs):
-    """
-    Cleanup Python requirements by removing duplicates and excluded packages.
-
-    The user requirements file will go through the deduplication process, but
-    skips the special package exclusion process.
-
-    :param dict collection_py_reqs: A dict of lists of Python requirements, keyed
-        by fully qualified collection name. The special key `user` holds requirements
-        from the user specified requirements file from the ``--user-pip`` CLI option.
-
-    :returns: A finalized list of sanitized Python requirements.
-    """
-    # de-duplication
-    consolidated = []
-    seen_pkgs = set()
-
-    for collection, lines in collection_py_reqs.items():
-        try:
-            for req in requirements.parse('\n'.join(lines)):
-                if req.specifier:
-                    req.name = importlib.metadata.Prepared(req.name).normalized
-                req.collections = [collection]  # add backref for later
-                if req.name is None:
-                    consolidated.append(req)
-                    continue
-                if req.name in seen_pkgs:
-                    for prior_req in consolidated:
-                        if req.name == prior_req.name:
-                            prior_req.specs.extend(req.specs)
-                            prior_req.collections.append(collection)
-                            break
-                    continue
-                consolidated.append(req)
-                seen_pkgs.add(req.name)
-        except Exception as e:
-            logger.warning('Warning: failed to parse requirements from %s, error: %s', collection, e)
-
-    # removal of unwanted packages
-    sanitized = []
-    for req in consolidated:
-        # Exclude packages, unless it was present in the user supplied requirements.
-        if req.name and req.name.lower() in EXCLUDE_REQUIREMENTS and 'user' not in req.collections:
-            logger.debug('# Excluding requirement %s from %s', req.name, req.collections)
-            continue
-        if req.vcs or req.uri:
-            # Requirement like git+ or http return as-is
-            new_line = req.line
-        elif req.name:
-            specs = ['{0}{1}'.format(cmp, ver) for cmp, ver in req.specs]
-            new_line = req.name + ','.join(specs)
-        else:
-            raise RuntimeError('Could not process {0}'.format(req.line))
-
-        sanitized.append(new_line + '  # from collection {}'.format(','.join(req.collections)))
-
-    return sanitized
-
-
 def write_file(filename: str, lines: list) -> bool:
     parent_dir = os.path.dirname(filename)
     if parent_dir and not os.path.exists(parent_dir):
@@ -380,8 +487,7 @@ def write_file(filename: str, lines: list) -> bool:
             if f.read() == new_text:
                 logger.debug("File %s is already up-to-date.", filename)
                 return False
-            else:
-                logger.warning('File %s had modifications and will be rewritten', filename)
+            logger.warning('File %s had modifications and will be rewritten', filename)
     with open(filename, 'w') as f:
         f.write(new_text)
     return True

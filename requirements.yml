@@ -5,7 +5,7 @@
       version: '3.1.1'
     # Install juniper.device collection from Ansible Galaxy.
     - name: juniper.device
-      version: '2.0.1'
+      version: '2.0.5'
     # Install junipernetworks collection from Ansible Galaxy.
     - name: junipernetworks.junos
-      version: '11.1.0'
+      version: '11.1.1'
