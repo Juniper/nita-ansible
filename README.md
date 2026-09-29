@@ -1,13 +1,12 @@
-[branch]: https://github.com/Juniper/nita/tree/23.12
-[readme]: https://github.com/Juniper/nita/blob/23.12/README.md
-[create_ansible_job_k8s]: https://github.com/Juniper/nita-jenkins/blob/23.12/create_ansible_job_k8s.py
+[branch]: https://github.com/Juniper/nita/tree/26.10
+[readme]: https://github.com/Juniper/nita/blob/26.10/README.md
+[create_ansible_job_k8s]: https://github.com/Juniper/nita-jenkins/blob/26.10/create_ansible_job_k8s.py
 
-# NITA Ansible 23.12
+# NITA Ansible 26.10
 
 Welcome to NITA, an open source platform for automating the building and testing of complex networks.
 
 # Release Notes
-The major change in this version is that all components now run within pods under the control of Kubernetes, rather than as Docker containers. Consequently we have updated the way that Ansible runs because it is now controlled by Kubernetes instead of Docker. 
 
 Please refer to the [README][readme] for more details.
 
